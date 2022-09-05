@@ -61,3 +61,26 @@ export const attributePosition: Record<ModifiableStat, number> = {
   avi: 3,
   rld: 4,
 };
+
+export const TICKS_PER_SECOND = 150;
+
+export const ShipType = {
+  1: ["Destroyer", "Destroyers", "DD", "DD"],
+  2: ["Light Cruiser", "Light cruisers", "CL", "CL"],
+  3: ["Heavy Cruiser", "Heavy cruisers", "CA", "CA"],
+  4: ["Battlecruiser", "Battlecruisers", "BC", "BC"],
+  5: ["Battleship", "Battleships", "BB", "BB"],
+  6: ["Light Aircraft Carrier", "Light aircraft carriers", "CVL", "CVL"],
+  7: ["Aircraft Carrier", "Aircraft carriers", "CV", "CV"],
+  8: ["Submarine", "Submarines", "SS", "SS"],
+  9: ["Aviation Cruiser", "Aviation cruisers", "CAV", "CAV"],
+  10: ["Aviation Battleship", "Aviation battleships", "BBV", "BBV"],
+  11: ["Torpedo Cruiser", "Torpedo cruisers", "CT", "CT"],
+  12: ["Repair Ship", "Repair ships", "AR", "AR"],
+  13: ["Monitor", "Monitors", "BM", "BM"],
+  17: ["Submarine Carrier", "Submarine carriers", "SSV", "SSV"],
+  18: ["Large Cruiser", "Large cruisers", "CB", "CB"],
+  19: ["Munition Ship", "Munition ships", "AE", "AE"],
+  20: ["DDG", "Guided-missile destroyers", "DDG", "DDG"],
+  21: ["DDG", "Guided-missile destroyers", "DDG", "DDG"],
+};
