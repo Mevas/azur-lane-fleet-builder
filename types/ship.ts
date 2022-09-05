@@ -88,7 +88,30 @@ export type Enhancement = {
 
 export type Enhancements = Record<string, Enhancement>;
 
-export type Ship = {
-  raw: ShipData;
+export type ObtainedShip = {
+  id: number;
+  level: number;
+  intimacy: Intimacy;
+  lb: number;
+  enhanced: boolean;
+};
+
+export type FleetShip = {
+  id: number;
   equipment: [];
+};
+
+export type Positioning = {
+  left?: FleetShip;
+  center?: FleetShip;
+  right?: FleetShip;
+};
+
+export type Fleet = {
+  id: string;
+  name: string;
+  ships: {
+    main: Positioning;
+    vanguard: Positioning;
+  };
 };

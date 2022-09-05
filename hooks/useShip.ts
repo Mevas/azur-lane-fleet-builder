@@ -1,11 +1,13 @@
-import { Intimacy } from "../types/ship";
+import { Intimacy, ObtainedShip } from "../types/ship";
 import {
   affinity,
   attributePosition,
   attributes,
 } from "../styles/utils/constants";
 import { enhancements, getBaseId, getShipById } from "../styles/utils/data";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+import { useRecoilState } from "recoil";
+import { shipsState } from "../atoms/ships";
 
 const calculateStat = ({
   stat,
@@ -24,25 +26,47 @@ const calculateStat = ({
   );
 };
 
-export const useShip = (id?: number, options?: { lb?: number }) => {
-  const [level, setLevel] = useState<number>(100);
-  const [intimacy, setIntimacy] = useState<Intimacy>("love");
-  const [enhanced, setEnhanced] = useState<boolean>(true);
-  const [lb, setLb] = useState<number>(options?.lb ?? 0);
+export const useShipState = (id: number) => {
+  const [obtainedShips, setState] = useRecoilState(shipsState);
 
-  const shipData = id ? getShipById(id, { lb }) : undefined;
+  const ship = useMemo(
+    () => obtainedShips.find((ship) => ship.id === id),
+    [id, obtainedShips]
+  );
+
+  if (!ship) {
+    throw Error(`Invalid ship ID: ${id}`);
+  }
+
+  const set = useCallback(
+    <TKey extends keyof ObtainedShip>(key: TKey, value: ObtainedShip[TKey]) =>
+      setState((ships) =>
+        ships.map((ship) => (ship.id === id ? { ...ship, [key]: value } : ship))
+      ),
+    [id, setState]
+  );
+
+  return useMemo(() => ({ ...ship, set }), [set, ship]);
+};
+
+export const useShip = (id: number) => {
+  const ship = useShipState(id);
+
+  const shipData = id ? getShipById(id, { lb: ship.lb }) : undefined;
 
   useEffect(() => {
-    setLb(
-      level <= 70
+    ship.set(
+      "lb",
+      ship.level <= 70
         ? 0
-        : level > 70 && level <= 80
+        : ship.level > 70 && ship.level <= 80
         ? 1
-        : level > 80 && level <= 90
+        : ship.level > 80 && ship.level <= 90
         ? 2
         : 3
     );
-  }, [level]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ship.level]);
 
   const stats = useMemo(() => {
     if (!shipData) {
@@ -62,10 +86,10 @@ export const useShip = (id?: number, options?: { lb?: number }) => {
                 value: shipData.attrs[index],
                 growth: shipData.attrs_growth[index],
               },
-              level,
-              intimacy,
+              level: ship.level,
+              intimacy: ship.intimacy,
               enhancement:
-                enhanced && enhanceable
+                ship.enhanced && enhanceable
                   ? enhancements[getBaseId(shipData.id)].durability[
                       attributePosition[attributeEnhancePosition]
                     ]
@@ -75,16 +99,11 @@ export const useShip = (id?: number, options?: { lb?: number }) => {
         ];
       })
     );
-  }, [enhanced, intimacy, level, shipData]);
+  }, [ship.enhanced, ship.intimacy, ship.level, shipData]);
 
   return {
+    ...ship,
     raw: shipData,
     stats,
-    level,
-    intimacy,
-    enhanced,
-    setLevel,
-    setIntimacy,
-    setEnhanced,
   };
 };
