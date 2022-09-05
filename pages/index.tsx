@@ -1,11 +1,8 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import Slider from "@mui/material/Slider";
 import { useState } from "react";
-import shipsJson from "../data/ship_data_statistics.json";
-import enhancementsJson from "../data/ship_data_strengthen.json";
 import weaponJson from "../data/weapon_property.json";
 import equipmentJson from "../data/equip_data_statistics.json";
 
@@ -17,11 +14,9 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import { Affection, Attrs, Enhancements, Ship, Stat } from "../types/ship";
+import { Intimacy, ShipData } from "../types/ship";
 import {
   affinity,
-  attributePosition,
-  attributes,
   nationality,
   TICKS_PER_SECOND,
 } from "../styles/utils/constants";
@@ -30,26 +25,10 @@ import {
   calculateAccuracy,
   calculateCriticalChance,
 } from "../styles/utils/formulas";
+import { ships } from "../styles/utils/data";
+import { useShip } from "../hooks/useShip";
 
-const ships = Object.fromEntries(
-  Object.entries(shipsJson as Ship[]).filter(
-    ([, ship]) => ship.is_character === 1
-  )
-);
-
-const enhancements = enhancementsJson as unknown as Enhancements;
-
-const getGroupId = (id: number) => id.toString().slice(0, -1);
-
-const getShipById = (id: number) => {
-  const groupId = getGroupId(id);
-
-  return Object.entries(ships)
-    .filter(([, ship]) => ship.id.toString().startsWith(groupId))
-    .map(([, s]) => s);
-};
-
-const getName = (ship: Ship) => {
+const getName = (ship: ShipData) => {
   return `${ship.name} (${nationality[ship.nationality]})`;
 };
 
@@ -93,8 +72,15 @@ const marks = [
   },
 ];
 
+const options = Object.entries(ships)
+  .filter(([id]) => id.endsWith("1"))
+  .map(([, s]) => ({
+    label: getName(s),
+    id: s.id,
+  }))
+  .sort();
+
 const Home: NextPage = () => {
-  const [level, setLevel] = useState<number>(30);
   const [selectedShip, setSelectedShip] = useState<{
     label: string;
     id: number;
@@ -103,74 +89,11 @@ const Home: NextPage = () => {
     label: string;
     id: number;
   } | null>(null);
-  const [affection, setAffection] = useState<Affection>("stranger");
-  const [maxEnhancements, setMaxEnhancements] = useState<boolean>(true);
 
-  const handleChange = (event: Event, newValue: number | number[]) => {
-    setLevel(newValue as number);
-  };
-
-  const ship = selectedShip
-    ? getShipById(selectedShip.id)[
-        level <= 70
-          ? 0
-          : level > 70 && level <= 80
-          ? 1
-          : level > 80 && level <= 90
-          ? 2
-          : 3
-      ]
-    : undefined;
-
-  const getStat = (
-    attrs: Attrs,
-    growth: Attrs,
-    stat: Stat,
-    level: number,
-    enhance: number = 0,
-    affinity: number = 1
-  ) => {
-    return (
-      (attrs[attributes[stat][1]] +
-        ((level - 1) * growth[attributes[stat][1]]) / 1000 +
-        enhance) *
-      affinity
-    );
-  };
-  const options = Object.entries(ships)
-    .filter(([id]) => id.endsWith("1"))
-    .map(([, s]) => ({
-      label: getName(s),
-      id: s.id,
-    }))
-    .sort();
-
-  const stats = ship
-    ? Object.fromEntries(
-        Object.entries(attributes).map(([key, values]) => [
-          key,
-          Math.floor(
-            getStat(
-              ship.attrs,
-              ship.attrs_growth,
-              key as Stat,
-              level,
-              values[3] !== undefined
-                ? maxEnhancements && selectedShip
-                  ? enhancements[getGroupId(selectedShip.id)].durability[
-                      attributePosition[values[3]]
-                    ]
-                  : 0
-                : 0,
-              affinity[affection]
-            )
-          ),
-        ])
-      )
-    : undefined;
+  const ship = useShip(selectedShip?.id);
 
   const getDmg = () => {
-    if (!selectedGun || !stats || !ship) {
+    if (!selectedGun || !ship.stats || !ship || !ship.raw) {
       return;
     }
 
@@ -180,7 +103,7 @@ const Home: NextPage = () => {
       critDmg: 0.5,
     };
 
-    const attackerLevel = level;
+    const attackerLevel = ship.level;
     const defenderLevel = 113;
 
     const defenderEva = 69; // Arbiter
@@ -190,9 +113,9 @@ const Home: NextPage = () => {
 
     const critRate = calculateCriticalChance({
       attacker: {
-        hit: stats.hit,
-        luck: stats.luck,
-        level,
+        hit: ship.stats.hit,
+        luck: ship.stats.luck,
+        level: ship.level,
         bonus: 0,
       },
       defender: {
@@ -224,9 +147,9 @@ const Home: NextPage = () => {
 
     const accuracy = calculateAccuracy({
       attacker: {
-        hit: stats.hit,
-        luck: stats.luck,
-        level,
+        hit: ship.stats.hit,
+        luck: ship.stats.luck,
+        level: ship.level,
       },
       defender: {
         eva: defenderEva,
@@ -242,8 +165,9 @@ const Home: NextPage = () => {
     const finalDmg =
       (weaponsProps.damage *
         coefficient *
-        ship.equipment_proficiency[0] *
-        (1 + (stats["cannon"] / 100) * (1 + formationBonus + fpSkillBonus)) +
+        ship.raw.equipment_proficiency[0] *
+        (1 +
+          (ship.stats["cannon"] / 100) * (1 + formationBonus + fpSkillBonus)) +
         randomBit) *
       armorModifier *
       levelAdvantage *
@@ -256,7 +180,7 @@ const Home: NextPage = () => {
 
     const finalReload =
       (weaponsProps.reload_max / TICKS_PER_SECOND) *
-      Math.sqrt(200 / (stats.reload * (1 + 0) + 100));
+      Math.sqrt(200 / (ship.stats.reload * (1 + 0) + 100));
 
     const timePerShell = 0.05;
     const shells = 5;
@@ -333,25 +257,25 @@ const Home: NextPage = () => {
             <FormControlLabel
               control={
                 <Switch
-                  checked={maxEnhancements}
-                  onChange={(event, checked) => setMaxEnhancements(checked)}
+                  checked={ship.enhanced}
+                  onChange={(event, checked) => ship.setEnhanced(checked)}
                 />
               }
               label="Max enhancements"
             />
 
             <ToggleButtonGroup
-              value={affection}
+              value={ship.intimacy}
               exclusive
               onChange={(
                 event: React.MouseEvent<HTMLElement>,
-                newAffection: Affection | null
+                newIntimacy: Intimacy | null
               ) => {
-                if (!newAffection) {
+                if (!newIntimacy) {
                   return;
                 }
 
-                setAffection(newAffection);
+                ship.setIntimacy(newIntimacy);
               }}
             >
               {Object.keys(affinity).map((val) => (
@@ -362,9 +286,9 @@ const Home: NextPage = () => {
             </ToggleButtonGroup>
           </div>
 
-          {ship && stats && (
+          {ship && ship.stats && (
             <div>
-              {Object.entries(stats).map(([stat, value]) => (
+              {Object.entries(ship.stats).map(([stat, value]) => (
                 <div key={stat}>
                   {stat}: {value}
                 </div>
@@ -375,8 +299,14 @@ const Home: NextPage = () => {
         <Slider
           min={1}
           max={125}
-          value={level}
-          onChange={handleChange}
+          value={ship.level}
+          onChange={(event, newLevel) => {
+            if (typeof newLevel !== "number") {
+              return;
+            }
+
+            ship.setLevel(newLevel);
+          }}
           valueLabelDisplay="auto"
           marks={marks}
         />
@@ -405,19 +335,6 @@ const Home: NextPage = () => {
         <div>Crit chance: {((gun?.critRate ?? 0) * 100).toFixed(2)}%</div>
         <div>Chance to hit: {((gun?.accuracy ?? 0) * 100).toFixed(2)}%</div>
       </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{" "}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
     </div>
   );
 };

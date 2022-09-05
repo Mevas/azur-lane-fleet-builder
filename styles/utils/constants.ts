@@ -1,4 +1,4 @@
-import { ModifiableStat, Stat } from "../../types/ship";
+import { ModifiableStat, StatName } from "../../types/ship";
 
 export const nationality = {
   0: "Universal",
@@ -33,7 +33,7 @@ export const affinity = {
 };
 
 export const attributes: Record<
-  Stat,
+  StatName,
   [
     shorthand: string,
     position: number,

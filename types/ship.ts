@@ -1,6 +1,6 @@
 import { affinity, nationality } from "../styles/utils/constants";
 
-export type Stat =
+export type StatName =
   | "durability"
   | "cannon"
   | "torpedo"
@@ -35,7 +35,7 @@ export type Attrs = [
   antisub: number
 ];
 
-export type Ship = {
+export type ShipData = {
   aim_offset: [number, number, number];
   ammo: number;
   armor_type: 0 | 1 | 2;
@@ -56,7 +56,7 @@ export type Ship = {
   huntingrange_level: number;
   id: number;
   is_character: NumericBoolean;
-  lock: Stat[];
+  lock: StatName[];
   name: string;
   nationality: keyof typeof nationality;
   oxy_cost: number;
@@ -77,7 +77,7 @@ export type Ship = {
   type: number;
 };
 
-export type Affection = keyof typeof affinity;
+export type Intimacy = keyof typeof affinity;
 
 export type Enhancement = {
   attr_exp: [number, number, number, number, number];
@@ -87,3 +87,8 @@ export type Enhancement = {
 };
 
 export type Enhancements = Record<string, Enhancement>;
+
+export type Ship = {
+  raw: ShipData;
+  equipment: [];
+};
