@@ -1,12 +1,11 @@
-import type { GetServerSideProps, NextPage } from "next";
+import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
-import { AzurAPI } from "@azurapi/azurapi";
 import Slider from "@mui/material/Slider";
 import { useState } from "react";
-import data from "../data/ship_data_statistics.json";
-import enhancements from "../data/ship_data_strengthen.json";
+import shipsJson from "../data/ship_data_statistics.json";
+import enhancementsJson from "../data/ship_data_strengthen.json";
 import {
   Autocomplete,
   FormControlLabel,
@@ -15,62 +14,21 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
+import { Affection, Attrs, Enhancements, Ship, Stat } from "../types/ship";
+import {
+  affinity,
+  attributePosition,
+  attributes,
+  nationality,
+} from "../styles/utils/constants";
 
 const ships = Object.fromEntries(
-  Object.entries(data as any).filter(([, ship]) => ship.is_character === 1)
+  Object.entries(shipsJson as Ship[]).filter(
+    ([, ship]) => ship.is_character === 1
+  )
 );
 
-const nationality = {
-  0: "Universal",
-  1: "Eagle Union",
-  2: "Royal Navy",
-  3: "Sakura Empire",
-  4: "Iron Blood",
-  5: "Dragon Empery",
-  6: "Sardegna Empire",
-  7: "Northern Parliament",
-  8: "Iris Libre",
-  9: "Vichya Dominion",
-  97: "META",
-  98: "Universal",
-  101: "Neptunia",
-  102: "Bilibili",
-  103: "Utawarerumono",
-  104: "Kizuna AI",
-  105: "Hololive",
-  106: "Venus Vacation",
-  107: "The Idolmaster",
-  108: "SSSS",
-};
-
-const attributes = {
-  durability: ["Health", 0, "Health"],
-  cannon: ["Fire", 1, "Firepower", "fp"],
-  torpedo: ["Torp", 2, "Torpedo", "trp"],
-  antiaircraft: ["AA", 3, "AA"],
-  air: ["Air", 4, "Aviation", "avi"],
-  reload: ["Reload", 5, "Reload", "rld"],
-  armor: ["ArmorDebug", 6, "Armor"],
-  hit: ["Acc", 7, "Accuracy"],
-  dodge: ["Evade", 8, "Evasion"],
-  speed: ["Speed", 9, "Speed"],
-  luck: ["Luck", 10, "Luck"],
-  antisub: ["ASW", 11, "ASW"],
-};
-
-// attr, enhance pos
-const attribute_enhance = {
-  fp: 0,
-  trp: 1,
-  avi: 3,
-  rld: 4,
-};
-
-const getShip = (name: string) => {
-  return Object.entries(ships)
-    .filter(([, ship]) => ship.english_name === name)
-    .map(([, s]) => s);
-};
+const enhancements = enhancementsJson as unknown as Enhancements;
 
 const getGroupId = (id: number) => id.toString().slice(0, -1);
 
@@ -82,7 +40,7 @@ const getShipById = (id: number) => {
     .map(([, s]) => s);
 };
 
-const getName = (ship: any) => {
+const getName = (ship: Ship) => {
   return `${ship.name} (${nationality[ship.nationality]})`;
 };
 
@@ -92,15 +50,8 @@ const Home: NextPage = () => {
     label: string;
     id: number;
   } | null>(null);
-  const [affection, setAffection] = useState<string>("stranger");
+  const [affection, setAffection] = useState<Affection>("stranger");
   const [maxEnhancements, setMaxEnhancements] = useState<boolean>(true);
-
-  const handleAlignment = (
-    event: React.MouseEvent<HTMLElement>,
-    newAffection: string | null
-  ) => {
-    setAffection(newAffection);
-  };
 
   const handleChange = (event: Event, newValue: number | number[]) => {
     setLevel(newValue as number);
@@ -118,27 +69,16 @@ const Home: NextPage = () => {
       ]
     : undefined;
 
-  const affinityValue = {
-    stranger: 1,
-    friendly: 1.01,
-    crush: 1.03,
-    love: 1.06,
-    oath: 1.09,
-    max: 1.12,
-  };
-
   const getStat = (
-    attrs: number[],
-    growth: number[],
-    stat: string,
+    attrs: Attrs,
+    growth: Attrs,
+    stat: Stat,
     level: number,
     enhance: number = 0,
     affinity: number = 1
   ) => {
-    // @ts-ignore
     return (
       (attrs[attributes[stat][1]] +
-        // @ts-ignore
         ((level - 1) * growth[attributes[stat][1]]) / 1000 +
         enhance) *
       affinity
@@ -151,7 +91,33 @@ const Home: NextPage = () => {
       id: s.id,
     }))
     .sort();
-  console.log("a", options);
+
+  const stats = ship
+    ? Object.fromEntries(
+        Object.entries(attributes).map(([key, values]) => [
+          key,
+          Math.floor(
+            getStat(
+              ship.attrs,
+              ship.attrs_growth,
+              key as Stat,
+              level,
+              values[3] !== undefined
+                ? maxEnhancements && selectedShip
+                  ? enhancements[getGroupId(selectedShip.id)].durability[
+                      attributePosition[values[3]]
+                    ]
+                  : 0
+                : 0,
+              affinity[affection]
+            )
+          ),
+        ])
+      )
+    : undefined;
+
+  const gunReloadTime =
+    stats && (3880 / 150) * Math.sqrt(200 / (stats.reload * (1 + 0) + 100));
 
   return (
     <div className={styles.container}>
@@ -184,7 +150,7 @@ const Home: NextPage = () => {
                   <TextField {...params} label="Ship" fullWidth />
                 )}
                 options={options}
-                onChange={(event: Event, newValue: number | number[]) => {
+                onChange={(event, newValue) => {
                   setSelectedShip(newValue);
                 }}
                 value={selectedShip}
@@ -205,9 +171,18 @@ const Home: NextPage = () => {
             <ToggleButtonGroup
               value={affection}
               exclusive
-              onChange={handleAlignment}
+              onChange={(
+                event: React.MouseEvent<HTMLElement>,
+                newAffection: Affection | null
+              ) => {
+                if (!newAffection) {
+                  return;
+                }
+
+                setAffection(newAffection);
+              }}
             >
-              {Object.keys(affinityValue).map((val) => (
+              {Object.keys(affinity).map((val) => (
                 <ToggleButton value={val} key={val}>
                   {val}
                 </ToggleButton>
@@ -215,25 +190,11 @@ const Home: NextPage = () => {
             </ToggleButtonGroup>
           </div>
 
-          {ship && (
+          {ship && stats && (
             <div>
-              {Object.entries(attributes).map(([key, values]) => (
-                <div>
-                  {key}:{" "}
-                  {Math.floor(
-                    getStat(
-                      ship.attrs,
-                      ship.attrs_growth,
-                      key,
-                      level,
-                      values[3] !== undefined
-                        ? maxEnhancements &&
-                            enhancements[getGroupId(selectedShip.id)]
-                              .durability[attribute_enhance[values[3]]]
-                        : 0,
-                      affinityValue[affection]
-                    )
-                  )}
+              {Object.entries(stats).map(([stat, value]) => (
+                <div key={stat}>
+                  {stat}: {value}
                 </div>
               ))}
             </div>
@@ -247,6 +208,8 @@ const Home: NextPage = () => {
           onChange={handleChange}
           valueLabelDisplay="auto"
         />
+
+        {gunReloadTime?.toFixed(2)}
       </main>
 
       <footer className={styles.footer}>
