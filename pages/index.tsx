@@ -26,7 +26,10 @@ import {
   TICKS_PER_SECOND,
 } from "../styles/utils/constants";
 import { clamp } from "../styles/utils/numeric";
-import { calculateCriticalChance } from "../styles/utils/formulas";
+import {
+  calculateAccuracy,
+  calculateCriticalChance,
+} from "../styles/utils/formulas";
 
 const ships = Object.fromEntries(
   Object.entries(shipsJson as Ship[]).filter(
@@ -219,17 +222,18 @@ const Home: NextPage = () => {
     const maxDanger = 10;
     const isSafe = false;
 
-    const accuracyVsShipTypeSkill = 0; // any ship skills that affect Accuracy against a specific hull type, such as Swiftsure's "Advanced Fire Control System" skill
-    const evasionRateSkill = 0; // skills that directly affect Evasion Evasion Rate, such as smoke screens or Aurora's "Dawn"
-    const accuracy = clamp(
-      0.1 +
-        stats.hit / (stats.hit + defenderEva + 2) +
-        (stats.luck - defenderLck + levelDifference) / 1000 +
-        accuracyVsShipTypeSkill -
-        evasionRateSkill,
-      0.1,
-      1
-    );
+    const accuracy = calculateAccuracy({
+      attacker: {
+        hit: stats.hit,
+        luck: stats.luck,
+        level,
+      },
+      defender: {
+        eva: defenderEva,
+        luck: defenderLck,
+        level: defenderLevel,
+      },
+    });
 
     const safeLevelAdvantage = 1 + (levelDifference + maxDanger) * 0.02;
     const dangerLevelAdvantage = 1 + levelDifference * 0.02;
