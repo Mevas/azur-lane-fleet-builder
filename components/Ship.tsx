@@ -21,7 +21,12 @@ export const Ship = ({ id }: ShipProps) => {
 
   return (
     <div>
-      <Image src={ship.iconUrl} alt="test" height={116} width={116} />
+      <Image
+        src={ship.iconUrl}
+        alt="Ship icon image"
+        height={116}
+        width={116}
+      />
       <div style={{ display: "flex" }}>
         <div style={{ display: "grid" }}>
           <FormControlLabel

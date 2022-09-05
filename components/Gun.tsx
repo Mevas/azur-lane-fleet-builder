@@ -5,11 +5,13 @@ import {
   calculateCriticalChance,
 } from "../styles/utils/formulas";
 import weaponJson from "../data/weapon_property.json";
-import { TICKS_PER_SECOND } from "../styles/utils/constants";
+import { RELOAD_CONSTANT } from "../styles/utils/constants";
 import equipmentJson from "../data/equip_data_statistics.json";
 import { Autocomplete, TextField } from "@mui/material";
 import { useShip } from "../hooks/useShip";
 import Slider from "@mui/material/Slider";
+import Image from "next/image";
+import { getEquipmentRarity, getGunIconUrl } from "../styles/utils/data";
 
 const gunOptions = Object.entries(equipmentJson)
   .filter(([id, s]) => !/[^\x00-\x7F]/.test(s.name) && id < 100000)
@@ -110,7 +112,7 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
       (1 + (critical ? 1 : 0) * (0.5 + criticalModifier));
 
     const finalReload =
-      (weaponsProps.reload_max / TICKS_PER_SECOND) *
+      (weaponsProps.reload_max / RELOAD_CONSTANT) *
       Math.sqrt(200 / (ship.stats.reload * (1 + 0) + 100));
 
     const timePerShell = 0.05;
@@ -135,9 +137,9 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
       finalDmg: finalDmg.toFixed(2),
       dps:
         (weaponsProps.damage * coefficient * 5 * 1) / //add salvo enumeration
-        (weaponsProps.reload_max / TICKS_PER_SECOND + 0.2 + 0.26),
+        (weaponsProps.reload_max / RELOAD_CONSTANT + 0.2 + 0.26),
       finalDps: finalDps.toFixed(2),
-      reload: weaponsProps.reload_max / TICKS_PER_SECOND,
+      reload: weaponsProps.reload_max / RELOAD_CONSTANT,
       finalReload,
       critRate,
       accuracy,
@@ -165,6 +167,29 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
           }}
         />
       </div>
+      {selectedGun && (
+        <div style={{ position: "relative", height: 116 }}>
+          <div style={{ position: "absolute" }}>
+            <Image
+              src={getEquipmentRarity(selectedGun.id)}
+              alt="Gun icon background"
+              objectFit="contain"
+              width={116}
+              height={116}
+            />
+          </div>{" "}
+          <div style={{ position: "absolute" }}>
+            <Image
+              src={getGunIconUrl(selectedGun.id)}
+              alt="Gun icon image"
+              objectFit="contain"
+              width={116}
+              height={116}
+              style={{ position: "absolute" }}
+            />
+          </div>
+        </div>
+      )}
       <Slider
         min={0}
         max={13}

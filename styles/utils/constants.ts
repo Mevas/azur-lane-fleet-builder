@@ -62,7 +62,7 @@ export const attributePosition: Record<ModifiableStat, number> = {
   rld: 4,
 };
 
-export const TICKS_PER_SECOND = 150;
+export const RELOAD_CONSTANT = 150.359569034;
 
 export const ShipType = {
   1: ["Destroyer", "Destroyers", "DD", "DD"],
