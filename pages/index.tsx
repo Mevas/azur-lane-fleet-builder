@@ -26,6 +26,7 @@ import {
   TICKS_PER_SECOND,
 } from "../styles/utils/constants";
 import { clamp } from "../styles/utils/numeric";
+import { calculateCriticalChance } from "../styles/utils/formulas";
 
 const ships = Object.fromEntries(
   Object.entries(shipsJson as Ship[]).filter(
@@ -181,15 +182,22 @@ const Home: NextPage = () => {
 
     const defenderEva = 69; // Arbiter
     const defenderLck = 45; // Arbiter
-    const attackerBonuses = jbBonuses.critRate; // equipment / skills
 
     const levelDifference = clamp(attackerLevel - defenderLevel, -25, 25);
 
-    const critRate =
-      0.05 +
-      stats.hit / (stats.hit + defenderEva + 2000) +
-      (stats.luck - defenderLck + levelDifference) / 5000 +
-      attackerBonuses;
+    const critRate = calculateCriticalChance({
+      attacker: {
+        hit: stats.hit,
+        luck: stats.luck,
+        level,
+        bonus: 0,
+      },
+      defender: {
+        eva: defenderEva,
+        luck: defenderLck,
+        level: defenderLevel,
+      },
+    });
 
     const weaponsProps = weaponJson[selectedGun.id + 13];
     const coefficient =
@@ -267,7 +275,7 @@ const Home: NextPage = () => {
       dmg: weaponsProps.damage,
       finalDmg: finalDmg.toFixed(2),
       dps:
-        (weaponsProps.damage * coefficient * 5 * 1) /
+        (weaponsProps.damage * coefficient * 5 * 1) / //add salvo enumeration
         (weaponsProps.reload_max / TICKS_PER_SECOND + 0.2 + 0.26),
       finalDps: finalDps.toFixed(2),
       reload: weaponsProps.reload_max / TICKS_PER_SECOND,
