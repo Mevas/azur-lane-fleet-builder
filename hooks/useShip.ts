@@ -4,7 +4,12 @@ import {
   attributePosition,
   attributes,
 } from "../styles/utils/constants";
-import { enhancements, getBaseId, getShipById } from "../styles/utils/data";
+import {
+  enhancements,
+  getBaseId,
+  getShipById,
+  getShipIconUrl,
+} from "../styles/utils/data";
 import { useCallback, useEffect, useMemo } from "react";
 import { useRecoilState } from "recoil";
 import { shipsState } from "../atoms/ships";
@@ -52,7 +57,8 @@ export const useShipState = (id: number) => {
 export const useShip = (id: number) => {
   const ship = useShipState(id);
 
-  const shipData = id ? getShipById(id, { lb: ship.lb }) : undefined;
+  const shipData = getShipById(id, { lb: ship.lb });
+  const iconUrl = getShipIconUrl(id);
 
   useEffect(() => {
     ship.set(
@@ -105,5 +111,6 @@ export const useShip = (id: number) => {
     ...ship,
     raw: shipData,
     stats,
+    iconUrl,
   };
 };

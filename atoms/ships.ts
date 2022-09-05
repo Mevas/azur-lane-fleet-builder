@@ -11,5 +11,8 @@ const defaultState = {
 
 export const shipsState = atom<ObtainedShip[]>({
   key: "shipsState",
-  default: Object.keys(ships).map((key) => ({ ...defaultState, id: +key })),
+  default: Object.entries(ships).map(([key]) => ({
+    ...defaultState,
+    id: +key,
+  })),
 });

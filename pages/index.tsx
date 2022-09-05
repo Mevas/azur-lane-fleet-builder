@@ -1,31 +1,10 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
-import React, { useState } from "react";
-import { Autocomplete, TextField } from "@mui/material";
-import { ShipData } from "../types/ship";
-import { nationality } from "../styles/utils/constants";
-import { ships } from "../styles/utils/data";
-import { Ship } from "../components/Ship";
-
-const getName = (ship: ShipData) => {
-  return `${ship.name} (${nationality[ship.nationality]})`;
-};
-
-const options = Object.entries(ships)
-  .filter(([id]) => id.endsWith("1"))
-  .map(([, s]) => ({
-    label: getName(s),
-    id: s.id,
-  }))
-  .sort();
+import React from "react";
+import { ShipCard } from "../components/ShipCard";
 
 const Home: NextPage = () => {
-  const [selectedShip, setSelectedShip] = useState<{
-    label: string;
-    id: number;
-  } | null>(null);
-
   return (
     <div className={styles.container}>
       <Head>
@@ -50,21 +29,11 @@ const Home: NextPage = () => {
         {/*  </div>*/}
         {/*))}*/}
 
-        <div style={{ width: 200 }}>
-          <Autocomplete
-            renderInput={(params) => (
-              <TextField {...params} label="Ship" fullWidth />
-            )}
-            options={options}
-            onChange={(event, newValue) => {
-              setSelectedShip(newValue);
-            }}
-            value={selectedShip}
-            // getOptionLabel={(option) => option.label}
-          />
+        <div style={{ display: "flex" }}>
+          <ShipCard />
+          <ShipCard />
+          <ShipCard />
         </div>
-
-        {selectedShip?.id && <Ship id={selectedShip.id} />}
       </main>
     </div>
   );
