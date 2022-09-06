@@ -1,16 +1,16 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { calculateDamage } from "../styles/utils/formulas";
-import { Autocomplete, TextField } from "@mui/material";
+import {
+  Autocomplete,
+  Checkbox,
+  FormControlLabel,
+  TextField,
+} from "@mui/material";
 import { useShip } from "../hooks/useShip";
 import Slider from "@mui/material/Slider";
-import Image from "next/image";
-import {
-  equipmentData,
-  getBgUrl,
-  getEquipment,
-  getEquipmentRarity,
-  getGunIconUrl,
-} from "../styles/utils/data";
+import { equipmentData, getBgUrl, getEquipment } from "../styles/utils/data";
+import { getMaxEquipmentLevel } from "../styles/utils/constants";
+import { GunIcon } from "./GunIcon";
 
 export const Gun = ({ equippedById }: { equippedById: number }) => {
   const ship = useShip(equippedById);
@@ -35,6 +35,7 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
     id: number;
   } | null>(null);
   const [gunRank, setGunRank] = useState(0);
+  const [alwaysCrits, setAlwaysCrits] = useState(false);
 
   const gun = useMemo(() => {
     if (!selectedGun) {
@@ -48,9 +49,23 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
   }, [gunRank, selectedGun]);
 
   useEffect(() => {
-    // setGunRank(Math.min(gun?.maxLevel ?? 0, 10));
-    setGunRank(gun?.maxLevel ?? 0);
+    setGunRank(Math.min(gun?.maxLevel ?? 0, 10));
+    // setGunRank(gun?.maxLevel ?? 0);
   }, [gun?.maxLevel]);
+
+  const defender = {
+    zone: {
+      safe: false,
+      maxDanger: 10,
+    },
+    defender: {
+      level: 114,
+      attributes: {
+        dodge: 75,
+        luck: 25,
+      },
+    },
+  } as const;
 
   const damage = useMemo(() => {
     if (!gun || !ship) {
@@ -62,22 +77,10 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
       gun,
       options: {
         ammo: 5,
-        // isCritical: true,
+        isCritical: alwaysCrits,
       },
-    }).against({
-      zone: {
-        safe: false,
-        maxDanger: 10,
-      },
-      defender: {
-        level: ship.level,
-        attributes: {
-          dodge: 69,
-          luck: 45,
-        },
-      },
-    });
-  }, [gun, ship]);
+    }).against(defender);
+  }, [alwaysCrits, gun, ship]);
 
   return (
     <div>
@@ -94,17 +97,52 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
               return null;
             }
 
+            const gun = getEquipment(option.id, {
+              level: Math.min(
+                10,
+                getMaxEquipmentLevel(
+                  equipmentData[option.id].rarity,
+                  equipmentData[option.id].tech
+                ) ?? 0
+              ),
+              type: "weapon",
+            });
+
+            const dmg =
+              ship && gun
+                ? calculateDamage({
+                    attacker: ship,
+                    gun,
+                    options: {
+                      ammo: 5,
+                      isCritical: alwaysCrits,
+                    },
+                  }).against(defender)
+                : undefined;
+
             return (
               <li
                 {...props}
                 key={option.id}
                 style={{
-                  backgroundImage: `url(${getBgUrl(
+                  background: `url(${getBgUrl(
                     equipment.stats.rarity - 1
-                  )})`,
+                  )}) no-repeat center center / cover`,
                 }}
               >
-                {option.label} - DPS: {}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "50px auto",
+                    alignItems: "center",
+                  }}
+                >
+                  <GunIcon id={option.id} size={50} noBackground />
+                  <div>
+                    {option.label}
+                    {dmg && ` - DPS: ${dmg.dps.toFixed(0)}`}
+                  </div>
+                </div>
               </li>
             );
           }}
@@ -120,29 +158,18 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
           }}
         />
       </div>
-      {selectedGun && (
-        <div style={{ position: "relative", height: 116 }}>
-          <div style={{ position: "absolute" }}>
-            <Image
-              src={getEquipmentRarity(selectedGun.id)}
-              alt="Gun icon background"
-              objectFit="contain"
-              width={116}
-              height={116}
-            />
-          </div>
-          <div style={{ position: "absolute" }}>
-            <Image
-              src={getGunIconUrl(selectedGun.id)}
-              alt="Gun icon image"
-              objectFit="contain"
-              width={116}
-              height={116}
-              style={{ position: "absolute" }}
-            />
-          </div>
-        </div>
-      )}
+      {selectedGun && <GunIcon id={selectedGun.id} size={116} />}
+
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={alwaysCrits}
+            onChange={(event, checked) => setAlwaysCrits(checked)}
+          />
+        }
+        label="Always crits"
+      />
+
       {gun && (
         <Slider
           min={0}
@@ -182,6 +209,7 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
           <div>Crit chance: {(damage.criticalChance * 100).toFixed(2)}%</div>
           <div>Crit multi: {(damage.criticalMultiplier * 100).toFixed(2)}%</div>
           <div>Chance to hit: {(damage.accuracy * 100).toFixed(2)}%</div>
+          <div>Expected damage by 120s: {(damage.dps * 120).toFixed(0)}</div>
         </>
       )}
     </div>

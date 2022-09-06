@@ -6,6 +6,7 @@ import equipmentJson from "../../data/equip_data_statistics.json";
 import weaponJson from "../../data/weapon_property.json";
 import limitBreakJson from "../../data/ship_data_breakout.json";
 import shipTemplateJson from "../../data/ship_data_template.json";
+import barrageTemplateJson from "../../data/barrage_template.json";
 
 import {
   WeaponData,
@@ -20,6 +21,7 @@ import {
 import { LimitBreakData } from "../../types/limitBreak";
 import { ShipTemplateData } from "../../types/shipTemplate";
 import { getMaxEquipmentLevel } from "./constants";
+import { BarrageTemplate, BarrageTemplateData } from "../../types/barrage";
 
 export const ships = Object.fromEntries(
   Object.entries(shipsJson as ShipData[]).filter(
@@ -32,6 +34,8 @@ export const equipmentData = equipmentJson as unknown as EquipmentData;
 export const weaponData = weaponJson as unknown as WeaponData;
 export const limitBreakData = limitBreakJson as unknown as LimitBreakData;
 export const shipTemplateData = shipTemplateJson as unknown as ShipTemplateData;
+export const barrageTemplateData =
+  barrageTemplateJson as unknown as BarrageTemplateData;
 
 export const groups = skinsJson as Record<
   string,
@@ -135,6 +139,13 @@ export type Equipment<TType extends EquipmentType> = Exclude<
   undefined
 >;
 export type Gun = Equipment<"weapon">;
+
+export const getVolleyTime = (barrage: BarrageTemplate) => {
+  return (
+    (barrage.primal_repeat * barrage.delay + barrage.senior_delay) *
+    barrage.senior_repeat
+  );
+};
 
 // function intersection(a: string[], b: string[]) {
 //   const setA = new Set(a);

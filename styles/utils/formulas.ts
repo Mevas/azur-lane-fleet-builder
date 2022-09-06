@@ -1,5 +1,5 @@
-import { clamp } from "./numeric";
-import { Gun } from "./data";
+import { average, clamp } from "./numeric";
+import { barrageTemplateData, getVolleyTime, Gun } from "./data";
 import { RELOAD_CONSTANT } from "./constants";
 import { Ship } from "../../hooks/useShip";
 
@@ -164,9 +164,15 @@ export const calculateDamage = ({
       200 / (attacker.attributes.reload * (1 + reloadSkillBonus) + 100)
     );
 
-  const timePerShell = 0.05;
-  const shells = 5;
-  const animationTime = (shells - 1) * timePerShell;
+  const barrages = gun.properties.barrage_ID.map(
+    (id) => barrageTemplateData[id]
+  );
+  const volleyTimes = barrages.map((barrage) => getVolleyTime(barrage));
+  const averageVolleyTime = average(volleyTimes);
+
+  const shells =
+    (barrages[0].senior_repeat + 1) * (barrages[0].primal_repeat + 1); // TODO: is this right?
+  const animationTime = averageVolleyTime;
   const delayBeforeVolley = {
     dd: 0.16,
     cl: 0.18,
