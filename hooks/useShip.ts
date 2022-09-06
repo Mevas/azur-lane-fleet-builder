@@ -1,4 +1,4 @@
-import { Intimacy, ObtainedShip } from "../types/ship";
+import { Intimacy, ObtainedShip, StatName } from "../types/ship";
 import {
   affinity,
   attributePosition,
@@ -7,7 +7,7 @@ import {
 import {
   enhancements,
   getBaseId,
-  getShipById,
+  getShip,
   getShipIconUrl,
 } from "../styles/utils/data";
 import { useCallback, useEffect, useMemo } from "react";
@@ -57,7 +57,7 @@ export const useShipState = (id: number) => {
 export const useShip = (id: number) => {
   const ship = useShipState(id);
 
-  const shipData = getShipById(id, { lb: ship.lb });
+  const shipData = getShip(id, { lb: ship.lb });
   const iconUrl = getShipIconUrl(id);
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export const useShip = (id: number) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ship.level]);
 
-  const stats = useMemo(() => {
+  const computedAttributes = useMemo(() => {
     if (!shipData) {
       return;
     }
@@ -89,8 +89,8 @@ export const useShip = (id: number) => {
           Math.floor(
             calculateStat({
               stat: {
-                value: shipData.attrs[index],
-                growth: shipData.attrs_growth[index],
+                value: shipData.stats.attrs[index],
+                growth: shipData.stats.attrs_growth[index],
               },
               level: ship.level,
               intimacy: ship.intimacy,
@@ -104,13 +104,20 @@ export const useShip = (id: number) => {
           ),
         ];
       })
-    );
+    ) as Record<StatName, number>;
   }, [ship.enhanced, ship.intimacy, ship.level, shipData]);
+
+  if (!computedAttributes || !shipData) {
+    console.warn("Invalid ship", id);
+    return;
+  }
 
   return {
     ...ship,
-    raw: shipData,
-    stats,
+    ...shipData,
+    attributes: computedAttributes,
     iconUrl,
   };
 };
+
+export type Ship = Exclude<ReturnType<typeof useShip>, undefined>;

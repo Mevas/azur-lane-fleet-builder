@@ -62,7 +62,8 @@ export const attributePosition: Record<ModifiableStat, number> = {
   rld: 4,
 };
 
-export const RELOAD_CONSTANT = 150.359569034;
+// 150 / 150.359569034 - base game reload constant / ship reload constant
+export const RELOAD_CONSTANT = 0.9976086;
 
 export const ShipType = {
   1: ["Destroyer", "Destroyers", "DD", "DD"],
@@ -83,4 +84,32 @@ export const ShipType = {
   19: ["Munition Ship", "Munition ships", "AE", "AE"],
   20: ["DDG", "Guided-missile destroyers", "DDG", "DDG"],
   21: ["DDG", "Guided-missile destroyers", "DDG", "DDG"],
+};
+
+const maxTierLevels: Record<number, number> = {
+  1: 3,
+  2: 3,
+  3: 7,
+  4: 11,
+  5: 13,
+  6: 13,
+};
+
+const nonMaxTierLevels: Record<number, number> = {
+  1: 3,
+  2: 3,
+  3: 6,
+  4: 10,
+  5: 10,
+  6: 10,
+};
+
+export const getMaxEquipmentLevel = (rarity: number, tier: number) => {
+  switch (tier) {
+    case 0:
+    case 3:
+      return maxTierLevels[rarity];
+    default:
+      return nonMaxTierLevels[rarity];
+  }
 };

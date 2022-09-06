@@ -3,8 +3,11 @@ import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import React from "react";
 import { ShipCard } from "../components/ShipCard";
+import { useFleet } from "../hooks/useFleet";
 
 const Home: NextPage = () => {
+  const { fleets } = useFleet();
+
   return (
     <div className={styles.container}>
       <Head>
@@ -29,7 +32,11 @@ const Home: NextPage = () => {
         {/*  </div>*/}
         {/*))}*/}
 
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
+          <ShipCard />
+          <ShipCard />
+          <ShipCard />
+
           <ShipCard />
           <ShipCard />
           <ShipCard />

@@ -1,29 +1,34 @@
-import React, { useState } from "react";
-import { clamp } from "../styles/utils/numeric";
-import {
-  calculateAccuracy,
-  calculateCriticalChance,
-} from "../styles/utils/formulas";
-import weaponJson from "../data/weapon_property.json";
-import { RELOAD_CONSTANT } from "../styles/utils/constants";
-import equipmentJson from "../data/equip_data_statistics.json";
+import React, { useEffect, useMemo, useState } from "react";
+import { calculateDamage } from "../styles/utils/formulas";
 import { Autocomplete, TextField } from "@mui/material";
 import { useShip } from "../hooks/useShip";
 import Slider from "@mui/material/Slider";
 import Image from "next/image";
-import { getEquipmentRarity, getGunIconUrl } from "../styles/utils/data";
-
-const gunOptions = Object.entries(equipmentJson)
-  .filter(([id, s]) => !/[^\x00-\x7F]/.test(s.name) && id < 100000)
-  .filter(([, s]) => [5].includes(s.rarity))
-  .map(([, s]) => ({
-    label: s.name,
-    id: s.id,
-  }))
-  .sort();
+import {
+  equipmentData,
+  getBgUrl,
+  getEquipment,
+  getEquipmentRarity,
+  getGunIconUrl,
+} from "../styles/utils/data";
 
 export const Gun = ({ equippedById }: { equippedById: number }) => {
   const ship = useShip(equippedById);
+
+  const gunOptions = useMemo(() => {
+    if (!ship) {
+      return [];
+    }
+
+    return Object.values(equipmentData)
+      .filter((equip) => equip.name && !/[^\x00-\x7F]/.test(equip.name))
+      .filter((equip) => ship.template.equip_1.includes(equip.type))
+      .map((equip) => ({
+        label: equip.name,
+        id: equip.id,
+      }))
+      .sort();
+  }, [ship]);
 
   const [selectedGun, setSelectedGun] = useState<{
     label: string;
@@ -31,122 +36,48 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
   } | null>(null);
   const [gunRank, setGunRank] = useState(0);
 
-  const getDmg = () => {
-    if (!selectedGun || !ship.stats || !ship || !ship.raw) {
+  const gun = useMemo(() => {
+    if (!selectedGun) {
+      return undefined;
+    }
+
+    return getEquipment(selectedGun.id, {
+      level: gunRank,
+      type: "weapon",
+    });
+  }, [gunRank, selectedGun]);
+
+  useEffect(() => {
+    // setGunRank(Math.min(gun?.maxLevel ?? 0, 10));
+    setGunRank(gun?.maxLevel ?? 0);
+  }, [gun?.maxLevel]);
+
+  const damage = useMemo(() => {
+    if (!gun || !ship) {
       return;
     }
 
-    const attackerLevel = ship.level;
-    const defenderLevel = 113;
-
-    const defenderEva = 69; // Arbiter
-    const defenderLck = 45; // Arbiter
-
-    const levelDifference = clamp(attackerLevel - defenderLevel, -25, 25);
-
-    const critRate = calculateCriticalChance({
-      attacker: {
-        hit: ship.stats.hit,
-        luck: ship.stats.luck,
-        level: ship.level,
-        bonus: 0,
+    return calculateDamage({
+      attacker: ship,
+      gun,
+      options: {
+        ammo: 5,
+        // isCritical: true,
+      },
+    }).against({
+      zone: {
+        safe: false,
+        maxDanger: 10,
       },
       defender: {
-        eva: defenderEva,
-        luck: defenderLck,
-        level: defenderLevel,
-      },
-    });
-
-    const weaponsProps = weaponJson[selectedGun.id + gunRank];
-    const coefficient =
-      (weaponsProps.corrected ?? weaponJson[selectedGun.id].corrected ?? 100) /
-      100;
-    const formationBonus = -0.05;
-    const fpSkillBonus = 0;
-    const armorModifier = 1;
-    const ammoBuff = 0.1;
-    const skillBuffs = 0; // skills that increase damage generally
-    const ammoTypeModifier = 0; // skills that affect ammo types
-    const enemyDebuff = 0; // skills like helena's radar scan
-    const hunterSkill = 0; // hull specific damage bonus
-    const manual = false; // did the user manually aim
-    const manualModifier = 0; // skills like JB's stuff
-    const critical = critRate; // Should be the crit chance for an average damage
-    const criticalModifier = 0;
-    const randomBit = 1; // can be 0, 1, 2 - on average will be 1
-    const maxDanger = 10;
-    const isSafe = false;
-
-    const accuracy = calculateAccuracy({
-      attacker: {
-        hit: ship.stats.hit,
-        luck: ship.stats.luck,
         level: ship.level,
-      },
-      defender: {
-        eva: defenderEva,
-        luck: defenderLck,
-        level: defenderLevel,
+        attributes: {
+          dodge: 69,
+          luck: 45,
+        },
       },
     });
-
-    const safeLevelAdvantage = 1 + (levelDifference + maxDanger) * 0.02;
-    const dangerLevelAdvantage = 1 + levelDifference * 0.02;
-    const levelAdvantage = isSafe ? safeLevelAdvantage : dangerLevelAdvantage;
-
-    const finalDmg =
-      (weaponsProps.damage *
-        coefficient *
-        ship.raw.equipment_proficiency[0] *
-        (1 +
-          (ship.stats["cannon"] / 100) * (1 + formationBonus + fpSkillBonus)) +
-        randomBit) *
-      armorModifier *
-      levelAdvantage *
-      (1 + ammoBuff + skillBuffs) *
-      (1 + ammoTypeModifier) *
-      (1 + enemyDebuff) *
-      (1 + hunterSkill) *
-      (1 + (manual ? 1 : 0) * (0.2 + manualModifier)) *
-      (1 + (critical ? 1 : 0) * (0.5 + criticalModifier));
-
-    const finalReload =
-      (weaponsProps.reload_max / RELOAD_CONSTANT) *
-      Math.sqrt(200 / (ship.stats.reload * (1 + 0) + 100));
-
-    const timePerShell = 0.05;
-    const shells = 5;
-    const animationTime = (shells - 1) * timePerShell;
-    const delayBeforeVolley = {
-      dd: 0.16,
-      cl: 0.18,
-      ca: 0.2,
-    };
-    const delayAfterVolley = 0.1;
-
-    const finalDps =
-      (accuracy * finalDmg * 5) /
-      (finalReload +
-        animationTime +
-        delayBeforeVolley["dd"] +
-        delayAfterVolley);
-
-    return {
-      dmg: weaponsProps.damage,
-      finalDmg: finalDmg.toFixed(2),
-      dps:
-        (weaponsProps.damage * coefficient * 5 * 1) / //add salvo enumeration
-        (weaponsProps.reload_max / RELOAD_CONSTANT + 0.2 + 0.26),
-      finalDps: finalDps.toFixed(2),
-      reload: weaponsProps.reload_max / RELOAD_CONSTANT,
-      finalReload,
-      critRate,
-      accuracy,
-    };
-  };
-
-  const gun = getDmg();
+  }, [gun, ship]);
 
   return (
     <div>
@@ -155,6 +86,28 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
           renderInput={(params) => (
             <TextField {...params} label="Main gun" fullWidth />
           )}
+          renderOption={(props, option) => {
+            const equipment = getEquipment(option.id, { level: 0 });
+
+            if (!equipment) {
+              console.warn("No equip found", option.id);
+              return null;
+            }
+
+            return (
+              <li
+                {...props}
+                key={option.id}
+                style={{
+                  backgroundImage: `url(${getBgUrl(
+                    equipment.stats.rarity - 1
+                  )})`,
+                }}
+              >
+                {option.label} - DPS: {}
+              </li>
+            );
+          }}
           options={gunOptions}
           onChange={(event, newValue) => {
             setSelectedGun(newValue);
@@ -177,7 +130,7 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
               width={116}
               height={116}
             />
-          </div>{" "}
+          </div>
           <div style={{ position: "absolute" }}>
             <Image
               src={getGunIconUrl(selectedGun.id)}
@@ -190,40 +143,47 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
           </div>
         </div>
       )}
-      <Slider
-        min={0}
-        max={13}
-        value={gunRank}
-        onChange={(event, newLevel) => {
-          if (typeof newLevel !== "number") {
-            return;
-          }
+      {gun && (
+        <Slider
+          min={0}
+          max={gun.maxLevel}
+          value={gunRank}
+          onChange={(event, newLevel) => {
+            if (typeof newLevel !== "number") {
+              return;
+            }
 
-          setGunRank(newLevel);
-        }}
-        valueLabelDisplay="auto"
-        marks={[
-          {
-            value: 0,
-            label: "0",
-          },
-          {
-            value: 10,
-            label: "10",
-          },
-          {
-            value: 13,
-            label: "13",
-          },
-        ]}
-      />
+            setGunRank(newLevel);
+          }}
+          valueLabelDisplay="auto"
+          marks={[
+            {
+              value: 0,
+              label: "0",
+            },
+            // {
+            //   value: 10,
+            //   label: "10",
+            // },
+            {
+              value: gun.maxLevel,
+              label: gun.maxLevel,
+            },
+          ]}
+        />
+      )}
       <div>{selectedGun?.id}</div>
-      <div>Damage: {gun?.dmg}</div>
-      <div>Damage per shot: {gun?.finalDmg}</div>
-      <div>DPS: {gun?.finalDps}</div>
-      <div>Reload: {gun?.finalReload.toFixed(2)}s</div>
-      <div>Crit chance: {((gun?.critRate ?? 0) * 100).toFixed(2)}%</div>
-      <div>Chance to hit: {((gun?.accuracy ?? 0) * 100).toFixed(2)}%</div>
+      {damage && (
+        <>
+          <div>Base damage: {damage.perBullet.base.toFixed(2)}</div>
+          <div>Average damage: {damage.perBullet.average.toFixed(2)}</div>
+          <div>DPS: {damage.dps.toFixed(2)}</div>
+          <div>Reload: {damage.reload.toFixed(2)}s</div>
+          <div>Crit chance: {(damage.criticalChance * 100).toFixed(2)}%</div>
+          <div>Crit multi: {(damage.criticalMultiplier * 100).toFixed(2)}%</div>
+          <div>Chance to hit: {(damage.accuracy * 100).toFixed(2)}%</div>
+        </>
+      )}
     </div>
   );
 };

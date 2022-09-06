@@ -3,15 +3,35 @@ import shipsJson from "../../data/ship_data_statistics.json";
 import enhancementsJson from "../../data/ship_data_strengthen.json";
 import skinsJson from "../../data/ship_skin_template.json";
 import equipmentJson from "../../data/equip_data_statistics.json";
+import weaponJson from "../../data/weapon_property.json";
+import limitBreakJson from "../../data/ship_data_breakout.json";
+import shipTemplateJson from "../../data/ship_data_template.json";
+
+import {
+  WeaponData,
+  WeaponDatum,
+  WeaponDatumWithBase,
+} from "../../types/weapon";
+import {
+  EquipmentData,
+  EquipmentDatum,
+  EquipmentDatumWithBase,
+} from "../../types/equipment";
+import { LimitBreakData } from "../../types/limitBreak";
+import { ShipTemplateData } from "../../types/shipTemplate";
+import { getMaxEquipmentLevel } from "./constants";
 
 export const ships = Object.fromEntries(
   Object.entries(shipsJson as ShipData[]).filter(
     ([, ship]) => ship.is_character === 1
   )
-  // .filter(([, ship]) => ship.name === "Laffey")
 );
 
 export const enhancements = enhancementsJson as unknown as Enhancements;
+export const equipmentData = equipmentJson as unknown as EquipmentData;
+export const weaponData = weaponJson as unknown as WeaponData;
+export const limitBreakData = limitBreakJson as unknown as LimitBreakData;
+export const shipTemplateData = shipTemplateJson as unknown as ShipTemplateData;
 
 export const groups = skinsJson as Record<
   string,
@@ -22,20 +42,27 @@ export const groups = skinsJson as Record<
 
 export const getBaseId = (id: number) => id.toString().slice(0, -1);
 
-export const getShipById = (
-  id: number,
-  options?: { lb?: number }
-): ShipData => {
+export const getShip = (id: number, options: { lb: number }) => {
   const groupId = getBaseId(id);
-  const lb = options?.lb ?? 0;
 
-  if (lb < 0 || lb > 3) {
+  if (options.lb < 0 || options.lb > 3) {
     throw Error("Invalid LB value");
   }
 
-  return Object.entries(ships)
-    .filter(([, ship]) => ship.id.toString().startsWith(groupId))
-    .map(([, s]) => s)[lb];
+  const shipId = +`${groupId}${options.lb + 1}`;
+
+  const stats = ships[shipId];
+  const limitBreaks = [4, 1, 2, 3].map(
+    (num) => limitBreakData[+`${groupId}${num}`]
+  );
+  const template = shipTemplateData[shipId];
+
+  return {
+    id,
+    stats,
+    limitBreaks,
+    template,
+  };
 };
 
 export const getShipIconUrl = (id: number) =>
@@ -53,3 +80,69 @@ export const getBgUrl = (rarity: number) =>
 
 export const getEquipmentRarity = (id: number) =>
   getBgUrl((equipmentJson as any)[id].rarity - 1);
+
+export type EquipmentType = "weapon" | "aux";
+
+export type WeaponProperties = WeaponDatum & WeaponDatumWithBase;
+export type EquipmentStats = EquipmentDatum & EquipmentDatumWithBase;
+
+export type GetEquipmentReturn<TType extends EquipmentType> = {
+  stats: EquipmentStats;
+  properties: TType extends "weapon"
+    ? WeaponProperties & {
+        /** Weapon reload time in seconds */
+        reload_time: number;
+      }
+    : undefined;
+  maxLevel: number;
+};
+
+export const getEquipment = <TType extends EquipmentType>(
+  id: number,
+  options: { level: number; type?: TType }
+): GetEquipmentReturn<TType> | undefined => {
+  if (!equipmentData[id + options.level]) {
+    return;
+  }
+
+  const equipment = {
+    maxLevel: getMaxEquipmentLevel(
+      equipmentData[id].rarity,
+      equipmentData[id].tech
+    ),
+    stats: {
+      ...equipmentData[id],
+      ...equipmentData[id + options.level],
+    },
+    properties:
+      options.type === "weapon"
+        ? {
+            ...weaponData[id],
+            ...weaponData[id + options.level],
+          }
+        : undefined,
+  } as GetEquipmentReturn<TType>;
+
+  if (equipment.properties) {
+    equipment.properties.reload_time = equipment.properties.reload_max / 150;
+  }
+
+  return equipment;
+};
+
+export type Equipment<TType extends EquipmentType> = Exclude<
+  ReturnType<typeof getEquipment<TType>>,
+  undefined
+>;
+export type Gun = Equipment<"weapon">;
+
+// function intersection(a: string[], b: string[]) {
+//   const setA = new Set(a);
+//   return b.filter((value) => setA.has(value));
+// }
+
+// const keys = Object.values(weaponData)
+//   .filter((d) => !d.base)
+//   .map((v) => Object.keys(v));
+// // console.log(keys.reduce((acc, curr) => intersection(acc, curr), keys[0]));
+// console.log(Object.values(equipmentData).filter((d) => d.base));

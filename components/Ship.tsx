@@ -19,6 +19,10 @@ export type ShipProps = {
 export const Ship = ({ id }: ShipProps) => {
   const ship = useShip(id);
 
+  if (!ship) {
+    return null;
+  }
+
   return (
     <div>
       <Image
@@ -61,9 +65,9 @@ export const Ship = ({ id }: ShipProps) => {
           </ToggleButtonGroup>
         </div>
 
-        {ship && ship.stats && (
+        {ship && ship.attributes && (
           <div>
-            {Object.entries(ship.stats).map(([stat, value]) => (
+            {Object.entries(ship.attributes).map(([stat, value]) => (
               <div key={stat}>
                 {stat}: {value}
               </div>
