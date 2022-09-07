@@ -171,7 +171,9 @@ export const calculateDamage = ({
   const averageVolleyTime = average(volleyTimes);
 
   const shells =
-    (barrages[0].senior_repeat + 1) * (barrages[0].primal_repeat + 1); // TODO: is this right?
+    (barrages[0].senior_repeat + 1) *
+    (barrages[0].primal_repeat + 1) *
+    attacker.stats.base_list[0]; // TODO: change the base list slot when adding equipability
   const animationTime = averageVolleyTime;
   const delayBeforeVolley = {
     dd: 0.16,

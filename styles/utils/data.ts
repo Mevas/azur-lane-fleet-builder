@@ -55,11 +55,19 @@ export const getShip = (id: number, options: { lb: number }) => {
 
   const shipId = +`${groupId}${options.lb + 1}`;
 
-  const stats = ships[shipId];
   const limitBreaks = [4, 1, 2, 3].map(
     (num) => limitBreakData[+`${groupId}${num}`]
   );
   const template = shipTemplateData[shipId];
+  // For some reason, the buff to extra max slots from a LB can exist in the `hide_buff_list` array instead of just being in `base_list`
+  const stats = {
+    ...ships[shipId],
+    base_list: ships[shipId].base_list.map((max, index) =>
+      (template as any)[`equip_${index + 1}`].includes(4)
+        ? max + template.hide_buff_list[0]
+        : max
+    ),
+  };
 
   return {
     id,
@@ -140,11 +148,9 @@ export type Equipment<TType extends EquipmentType> = Exclude<
 >;
 export type Gun = Equipment<"weapon">;
 
+// Doesn't take into account barrage.primal_repeat * barrage.delay since they don't affect the actual moment reloading starts
 export const getVolleyTime = (barrage: BarrageTemplate) => {
-  return (
-    (barrage.primal_repeat * barrage.delay + barrage.senior_delay) *
-    barrage.senior_repeat
-  );
+  return barrage.senior_delay * barrage.senior_repeat;
 };
 
 // function intersection(a: string[], b: string[]) {
