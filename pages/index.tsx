@@ -2,12 +2,12 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import React from "react";
-import { useFleets } from "../hooks/useFleets";
-import { Fleet } from "../components/Fleet";
 import { Button } from "@mui/material";
+import { useFormations } from "../hooks/useFormations";
+import { Formation } from "../components/Formation";
 
 const Home: NextPage = () => {
-  const fleets = useFleets();
+  const formations = useFormations();
 
   return (
     <div className={styles.container}>
@@ -33,10 +33,10 @@ const Home: NextPage = () => {
         {/*  </div>*/}
         {/*))}*/}
 
-        <Button onClick={fleets.create}>Create fleet</Button>
+        <Button onClick={formations.create}>Create formation</Button>
 
-        {fleets.ids.map((id) => (
-          <Fleet id={id} key={id} />
+        {formations.ids.map((id) => (
+          <Formation id={id} key={id} />
         ))}
       </main>
     </div>

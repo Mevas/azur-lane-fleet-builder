@@ -23,7 +23,6 @@ export const fleetSelector = selectorFamily<Fleet, FleetId>({
   set:
     (fleetId) =>
     ({ set, reset }, newFleet) => {
-      console.log(newFleet);
       // if 'newFleet' is an instance of Default value,
       // the 'set' method will delete the atom from the atomFamily.
       if (newFleet instanceof DefaultValue) {

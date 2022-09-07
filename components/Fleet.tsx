@@ -1,15 +1,12 @@
 import React from "react";
-import { FleetId } from "../atoms/fleets";
-import { useFleet } from "../hooks/useFleet";
 import { ShipCard } from "./ShipCard";
+import { Fleet as FleetType } from "../types/ship";
 
 export type FleetProps = {
-  id: FleetId;
+  fleet: FleetType;
 };
 
-export const Fleet = ({ id }: FleetProps) => {
-  const fleet = useFleet(id);
-
+export const Fleet = ({ fleet }: FleetProps) => {
   return (
     <div>
       {fleet.name}

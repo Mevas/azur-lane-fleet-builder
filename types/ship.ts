@@ -1,4 +1,6 @@
 import { affinity, nationality } from "../styles/utils/constants";
+import { FleetId } from "../atoms/fleets";
+import { FormationId } from "../atoms/formations";
 
 export type StatName =
   | "durability"
@@ -109,8 +111,17 @@ export type Positioning = {
 
 export type Fleet = {
   name: string;
+  formationId: FormationId;
   ships: {
     main: Positioning;
     vanguard: Positioning;
+  };
+};
+
+export type Formation<FleetType extends Fleet | FleetId> = {
+  name: string;
+  fleets: {
+    surface: FleetType[];
+    sub: FleetType | null;
   };
 };
