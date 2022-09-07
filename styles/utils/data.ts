@@ -24,7 +24,7 @@ import { getMaxEquipmentLevel } from "./constants";
 import { BarrageTemplate, BarrageTemplateData } from "../../types/barrage";
 
 export const ships = Object.fromEntries(
-  Object.entries(shipsJson as ShipData[]).filter(
+  Object.entries(shipsJson as unknown as ShipData[]).filter(
     ([, ship]) => ship.is_character === 1
   )
 );

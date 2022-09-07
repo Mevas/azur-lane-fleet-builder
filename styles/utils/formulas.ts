@@ -102,8 +102,12 @@ export type CalculateDamageParams = {
 
 export type Damage = {
   perBullet: number;
-  reload: number;
+  reload: {
+    weapon: number;
+    total: number;
+  };
   dps: number;
+  shells: number;
   against: (options: {
     defender: Pick<Ship, "level"> & {
       attributes: Pick<Ship["attributes"], "dodge" | "luck">;
@@ -186,7 +190,11 @@ export const calculateDamage = ({
     perBullet:
       baseDamage * (1 + (options?.isCritical ? 1 : 0) * criticalMultiplier),
     dps: finalDps,
-    reload: reloadTime,
+    shells,
+    reload: {
+      weapon: reloadTime,
+      total: totalReloadTime,
+    },
     against: ({ defender, zone }) => {
       const levelDifference = attacker.level - defender.level;
       const clampedLevelDifference = clamp(levelDifference, -25, 25);
@@ -240,11 +248,15 @@ export const calculateDamage = ({
           base: base * (options?.isCritical ? criticalMultiplier : 1),
           average,
         },
-        reload: reloadTime,
+        reload: {
+          weapon: reloadTime,
+          total: totalReloadTime,
+        },
         dps: averageDps,
         accuracy,
         criticalChance: critRate,
         criticalMultiplier,
+        shells,
       };
     },
   };

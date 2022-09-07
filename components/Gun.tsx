@@ -258,11 +258,17 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
         <>
           <div>Base damage: {damage.perBullet.base.toFixed(2)}</div>
           <div>Average damage: {damage.perBullet.average.toFixed(2)}</div>
+          <div>Shell count: {damage.shells}</div>
+          <div>
+            Reload: {damage.reload.weapon.toFixed(2)}s (in total{" "}
+            {damage.reload.total.toFixed(2)}s)
+          </div>
+          <div>APS: {(1 / damage.reload.total).toFixed(2)}</div>
           <div>DPS: {damage.dps.toFixed(2)}</div>
-          <div>Reload: {damage.reload.toFixed(2)}s</div>
           <div>Crit chance: {(damage.criticalChance * 100).toFixed(2)}%</div>
           <div>Crit multi: {(damage.criticalMultiplier * 100).toFixed(2)}%</div>
           <div>Chance to hit: {(damage.accuracy * 100).toFixed(2)}%</div>
+          <div>Expected damage by 30s: {(damage.dps * 30).toFixed(0)}</div>
           <div>Expected damage by 120s: {(damage.dps * 120).toFixed(0)}</div>
         </>
       )}
