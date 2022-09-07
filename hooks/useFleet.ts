@@ -1,8 +1,6 @@
-import { useRecoilState } from "recoil";
-import { fleetsState } from "../atoms/fleets";
+import { useRecoilValue } from "recoil";
+import { FleetId, fleetSelector } from "../atoms/fleets";
 
-export const useFleet = () => {
-  const [fleets, setFleets] = useRecoilState(fleetsState);
-  console.log(fleets);
-  return { fleets };
+export const useFleet = (id: FleetId) => {
+  return useRecoilValue(fleetSelector(id));
 };

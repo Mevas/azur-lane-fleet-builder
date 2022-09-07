@@ -108,7 +108,6 @@ export type Positioning = {
 };
 
 export type Fleet = {
-  id: string;
   name: string;
   ships: {
     main: Positioning;

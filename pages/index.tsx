@@ -2,11 +2,12 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import React from "react";
-import { ShipCard } from "../components/ShipCard";
-import { useFleet } from "../hooks/useFleet";
+import { useFleets } from "../hooks/useFleets";
+import { Fleet } from "../components/Fleet";
+import { Button } from "@mui/material";
 
 const Home: NextPage = () => {
-  const { fleets } = useFleet();
+  const fleets = useFleets();
 
   return (
     <div className={styles.container}>
@@ -32,15 +33,11 @@ const Home: NextPage = () => {
         {/*  </div>*/}
         {/*))}*/}
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
-          <ShipCard />
-          <ShipCard />
-          <ShipCard />
+        <Button onClick={fleets.create}>Create fleet</Button>
 
-          <ShipCard />
-          <ShipCard />
-          <ShipCard />
-        </div>
+        {fleets.ids.map((id) => (
+          <Fleet id={id} key={id} />
+        ))}
       </main>
     </div>
   );

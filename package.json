@@ -18,13 +18,15 @@
     "node-polyfill-webpack-plugin": "^2.0.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "recoil": "^0.7.5"
+    "recoil": "^0.7.5",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/benchmark": "^2.1.2",
     "@types/node": "18.7.14",
     "@types/react": "18.0.18",
     "@types/react-dom": "18.0.6",
+    "@types/uuid": "^8.3.4",
     "benchmark": "^2.1.4",
     "eslint": "8.22.0",
     "eslint-config-next": "12.2.5",
