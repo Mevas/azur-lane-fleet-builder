@@ -8,7 +8,11 @@ import {
 } from "@mui/material";
 import { useShip } from "../hooks/useShip";
 import Slider from "@mui/material/Slider";
-import { equipmentData, getBgUrl, getEquipment } from "../styles/utils/data";
+import {
+  equipmentData,
+  getEquipment,
+  getEquipmentRarity,
+} from "../styles/utils/data";
 import { getMaxEquipmentLevel } from "../styles/utils/constants";
 import { GunIcon } from "./GunIcon";
 
@@ -45,6 +49,11 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
       .filter(
         (equip) =>
           equip.name &&
+          equip.name !== "0" &&
+          !["Prologue", "Default gear", "序章用", "默认装备"].includes(
+            equip.descrip
+          ) &&
+          !["460mm"].some((term) => equip.name.includes(term)) &&
           !/[^\x00-\x7F]/.test(equip.name) &&
           ship.template.equip_1.includes(equip.type)
       )
@@ -168,8 +177,8 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
                 {...props}
                 key={option.id}
                 style={{
-                  background: `url(${getBgUrl(
-                    equipment.stats.rarity - 1
+                  background: `url(${getEquipmentRarity(
+                    option.id
                   )}) no-repeat center center / cover`,
                 }}
               >

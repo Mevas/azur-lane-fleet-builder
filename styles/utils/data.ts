@@ -91,7 +91,7 @@ export const getBgUrl = (rarity: number) =>
   `https://raw.githubusercontent.com/x94fujo6rpg/AzurLaneFleet/master/ui/bg${rarity}.png`;
 
 export const getEquipmentRarity = (id: number) =>
-  getBgUrl((equipmentJson as any)[id].rarity - 1);
+  getBgUrl((equipmentJson as any)[id].rarity - 1 || 1);
 
 export type EquipmentType = "weapon" | "aux";
 
@@ -175,3 +175,5 @@ export const getVolleyTime = (barrage: BarrageTemplate) => {
 //   .map((v) => Object.keys(v));
 // // console.log(keys.reduce((acc, curr) => intersection(acc, curr), keys[0]));
 // console.log(Object.values(equipmentData).filter((d) => d.base));
+
+// console.log(new Set(Object.values(equipmentData).map((e) => e.descrip)));

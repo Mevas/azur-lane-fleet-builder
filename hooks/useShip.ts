@@ -12,7 +12,7 @@ import {
 } from "../styles/utils/data";
 import { useCallback, useEffect, useMemo } from "react";
 import { useRecoilState } from "recoil";
-import { shipsState } from "../atoms/ships";
+import { shipsStateFamily } from "../atoms/ships";
 
 const calculateStat = ({
   stat,
@@ -32,12 +32,7 @@ const calculateStat = ({
 };
 
 export const useShipState = (id: number) => {
-  const [obtainedShips, setState] = useRecoilState(shipsState);
-
-  const ship = useMemo(
-    () => obtainedShips.find((ship) => ship.id === id),
-    [id, obtainedShips]
-  );
+  const [ship, setShip] = useRecoilState(shipsStateFamily(id));
 
   if (!ship) {
     throw Error(`Invalid ship ID: ${id}`);
@@ -45,10 +40,8 @@ export const useShipState = (id: number) => {
 
   const set = useCallback(
     <TKey extends keyof ObtainedShip>(key: TKey, value: ObtainedShip[TKey]) =>
-      setState((ships) =>
-        ships.map((ship) => (ship.id === id ? { ...ship, [key]: value } : ship))
-      ),
-    [id, setState]
+      setShip((ship) => ({ ...ship, [key]: value })),
+    [setShip]
   );
 
   return useMemo(() => ({ ...ship, set }), [set, ship]);

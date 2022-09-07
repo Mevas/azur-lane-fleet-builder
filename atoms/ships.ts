@@ -1,4 +1,4 @@
-import { atom } from "recoil";
+import { atomFamily } from "recoil";
 import { ObtainedShip } from "../types/ship";
 import { ships } from "../styles/utils/data";
 
@@ -9,10 +9,17 @@ const defaultState = {
   enhanced: true,
 } as const;
 
-export const shipsState = atom<ObtainedShip[]>({
-  key: "shipsState",
-  default: Object.entries(ships).map(([key]) => ({
-    ...defaultState,
-    id: +key,
-  })),
+const defaultShips = Object.fromEntries(
+  Object.entries(ships).map(([key]) => [
+    key,
+    {
+      ...defaultState,
+      id: +key,
+    },
+  ])
+);
+
+export const shipsStateFamily = atomFamily<ObtainedShip, number>({
+  key: "ships",
+  default: (id) => defaultShips[id],
 });
