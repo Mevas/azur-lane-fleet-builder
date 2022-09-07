@@ -15,20 +15,19 @@ import { GunIcon } from "./GunIcon";
 export const Gun = ({ equippedById }: { equippedById: number }) => {
   const ship = useShip(equippedById);
 
-  const gunOptions = useMemo(() => {
-    if (!ship) {
-      return [];
-    }
-
-    return Object.values(equipmentData)
-      .filter((equip) => equip.name && !/[^\x00-\x7F]/.test(equip.name))
-      .filter((equip) => ship.template.equip_1.includes(equip.type))
-      .map((equip) => ({
-        label: equip.name,
-        id: equip.id,
-      }))
-      .sort();
-  }, [ship]);
+  const defender = {
+    zone: {
+      safe: false,
+      maxDanger: 10,
+    },
+    defender: {
+      level: 120,
+      attributes: {
+        dodge: 75,
+        luck: 25,
+      },
+    },
+  } as const;
 
   const [selectedGun, setSelectedGun] = useState<{
     label: string;
@@ -36,6 +35,63 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
   } | null>(null);
   const [gunRank, setGunRank] = useState(0);
   const [alwaysCrits, setAlwaysCrits] = useState(false);
+
+  const gunOptions = useMemo(() => {
+    if (!ship) {
+      return [];
+    }
+
+    return Object.values(equipmentData)
+      .filter(
+        (equip) =>
+          equip.name &&
+          !/[^\x00-\x7F]/.test(equip.name) &&
+          ship.template.equip_1.includes(equip.type)
+      )
+      .map((equip) => ({
+        label: equip.name,
+        id: equip.id,
+      }))
+      .sort((equip1, equip2) => {
+        let gun1 = getEquipment(equip1.id, { level: 0, type: "weapon" });
+        let gun2 = getEquipment(equip2.id, { level: 0, type: "weapon" });
+        if (!gun1 || !gun2) {
+          return 0;
+        }
+        gun1 = getEquipment(equip1.id, {
+          level: Math.min(gun1.maxLevel, 10),
+          type: "weapon",
+        })!;
+        gun2 = getEquipment(equip2.id, {
+          level: Math.min(gun2.maxLevel, 10),
+          type: "weapon",
+        })!;
+
+        if (!gun1 || !gun2) {
+          return 0;
+        }
+
+        const dmg1 = calculateDamage({
+          attacker: ship,
+          gun: gun1,
+          options: {
+            ammo: 5,
+            isCritical: alwaysCrits,
+          },
+        }).against(defender);
+
+        const dmg2 = calculateDamage({
+          attacker: ship,
+          gun: gun2,
+          options: {
+            ammo: 5,
+            isCritical: alwaysCrits,
+          },
+        }).against(defender);
+
+        return dmg2.dps - dmg1.dps;
+      });
+  }, [alwaysCrits, ship]);
 
   const gun = useMemo(() => {
     if (!selectedGun) {
@@ -53,20 +109,6 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
     // setGunRank(gun?.maxLevel ?? 0);
   }, [gun?.maxLevel]);
 
-  const defender = {
-    zone: {
-      safe: false,
-      maxDanger: 10,
-    },
-    defender: {
-      level: 114,
-      attributes: {
-        dodge: 75,
-        luck: 25,
-      },
-    },
-  } as const;
-
   const damage = useMemo(() => {
     if (!gun || !ship) {
       return;
@@ -78,6 +120,7 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
       options: {
         ammo: 5,
         isCritical: alwaysCrits,
+        // reloadSkillBonus: 1,
       },
     }).against(defender);
   }, [alwaysCrits, gun, ship]);
@@ -140,7 +183,9 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
                   <GunIcon id={option.id} size={50} noBackground />
                   <div>
                     {option.label}
-                    {dmg && ` - DPS: ${dmg.dps.toFixed(0)}`}
+                    <span style={{ color: "red" }}>
+                      {dmg && ` - DPS: ${dmg.dps.toFixed(0)}`}
+                    </span>
                   </div>
                 </div>
               </li>

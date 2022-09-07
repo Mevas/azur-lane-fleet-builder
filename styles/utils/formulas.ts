@@ -1,6 +1,10 @@
 import { average, clamp } from "./numeric";
 import { barrageTemplateData, getVolleyTime, Gun } from "./data";
-import { RELOAD_CONSTANT } from "./constants";
+import {
+  delayAfterVolley,
+  delayBeforeVolley,
+  RELOAD_CONSTANT,
+} from "./constants";
 import { Ship } from "../../hooks/useShip";
 
 export type CalcualteCriticalChanceParams = {
@@ -99,7 +103,6 @@ export type CalculateDamageParams = {
 export type Damage = {
   perBullet: number;
   reload: number;
-  aps: number;
   dps: number;
   against: (options: {
     defender: Pick<Ship, "level"> & {
@@ -174,23 +177,15 @@ export const calculateDamage = ({
     (barrages[0].senior_repeat + 1) *
     (barrages[0].primal_repeat + 1) *
     attacker.stats.base_list[0]; // TODO: change the base list slot when adding equipability
-  const animationTime = averageVolleyTime;
-  const delayBeforeVolley = {
-    dd: 0.16,
-    cl: 0.18,
-    ca: 0.2,
-  };
-  const delayAfterVolley = 0.1;
 
   const totalReloadTime =
-    reloadTime + animationTime + delayBeforeVolley["dd"] + delayAfterVolley;
+    reloadTime + averageVolleyTime + delayBeforeVolley["dd"] + delayAfterVolley;
   const finalDps = (baseDamage * shells) / totalReloadTime;
 
   return {
     perBullet:
       baseDamage * (1 + (options?.isCritical ? 1 : 0) * criticalMultiplier),
     dps: finalDps,
-    aps: 1 / reloadTime,
     reload: reloadTime,
     against: ({ defender, zone }) => {
       const levelDifference = attacker.level - defender.level;
@@ -246,7 +241,6 @@ export const calculateDamage = ({
           average,
         },
         reload: reloadTime,
-        aps: 1 / reloadTime,
         dps: averageDps,
         accuracy,
         criticalChance: critRate,
@@ -255,3 +249,43 @@ export const calculateDamage = ({
     },
   };
 };
+
+// const test = Object.values(equipmentData).slice(0, 100);
+// let suite = new Suite();
+// suite
+//   .add("Reduce", () => {
+//     test.reduce(
+//       (acc, equip) => {
+//         if (!(equip.name && !/[^\x00-\x7F]/.test(equip.name))) {
+//           return acc;
+//         }
+//
+//         acc.push({
+//           label: equip.name,
+//           id: equip.id,
+//         });
+//
+//         return acc;
+//       },
+//       [] as Array<{
+//         label: string;
+//         id: number;
+//       }>
+//     );
+//   })
+//   .add("No reduce", () => {
+//     test
+//       .filter((equip) => equip.name && !/[^\x00-\x7F]/.test(equip.name))
+//       .map((equip) => ({
+//         label: equip.name,
+//         id: equip.id,
+//       }));
+//   })
+//   .on("cycle", function (event: any) {
+//     console.log(String(event.target));
+//   })
+//   .on("complete", function () {
+//     // @ts-ignore
+//     console.log("Fastest is: " + this.filter("fastest").map("name"));
+//   })
+//   .run();

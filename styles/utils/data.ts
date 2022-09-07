@@ -95,7 +95,10 @@ export const getEquipmentRarity = (id: number) =>
 
 export type EquipmentType = "weapon" | "aux";
 
-export type WeaponProperties = WeaponDatum & WeaponDatumWithBase;
+export type WeaponProperties = WeaponDatum &
+  WeaponDatumWithBase & {
+    reload_time: number;
+  };
 export type EquipmentStats = EquipmentDatum & EquipmentDatumWithBase;
 
 export type GetEquipmentReturn<TType extends EquipmentType> = {
@@ -109,37 +112,46 @@ export type GetEquipmentReturn<TType extends EquipmentType> = {
   maxLevel: number;
 };
 
+const processedEquipment = Object.fromEntries(
+  Object.entries(equipmentData).map(([_id, equipment]) => {
+    const id = +_id;
+
+    const maxLevel = getMaxEquipmentLevel(equipment.rarity, equipment.tech);
+
+    const equipmentLevels = [];
+    const weapon = weaponData[id];
+
+    for (let level = 0; level <= maxLevel; level++) {
+      const properties = weapon
+        ? ({
+            ...weapon,
+            ...weaponData[id + level],
+          } as WeaponProperties)
+        : undefined;
+
+      if (properties) {
+        properties.reload_time = properties.reload_max / 150;
+      }
+
+      equipmentLevels.push({
+        maxLevel: getMaxEquipmentLevel(equipment.rarity, equipment.tech),
+        stats: {
+          ...equipment,
+          ...equipmentData[id + level],
+        },
+        properties,
+      });
+    }
+
+    return [id, equipmentLevels];
+  })
+);
+
 export const getEquipment = <TType extends EquipmentType>(
   id: number,
   options: { level: number; type?: TType }
 ): GetEquipmentReturn<TType> | undefined => {
-  if (!equipmentData[id + options.level]) {
-    return;
-  }
-
-  const equipment = {
-    maxLevel: getMaxEquipmentLevel(
-      equipmentData[id].rarity,
-      equipmentData[id].tech
-    ),
-    stats: {
-      ...equipmentData[id],
-      ...equipmentData[id + options.level],
-    },
-    properties:
-      options.type === "weapon"
-        ? {
-            ...weaponData[id],
-            ...weaponData[id + options.level],
-          }
-        : undefined,
-  } as GetEquipmentReturn<TType>;
-
-  if (equipment.properties) {
-    equipment.properties.reload_time = equipment.properties.reload_max / 150;
-  }
-
-  return equipment;
+  return processedEquipment?.[id]?.[options.level] as GetEquipmentReturn<TType>;
 };
 
 export type Equipment<TType extends EquipmentType> = Exclude<

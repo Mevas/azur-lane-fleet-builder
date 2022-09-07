@@ -57,8 +57,8 @@ export const useShipState = (id: number) => {
 export const useShip = (id: number) => {
   const ship = useShipState(id);
 
-  const shipData = getShip(id, { lb: ship.lb });
-  const iconUrl = getShipIconUrl(id);
+  const shipData = useMemo(() => getShip(id, { lb: ship.lb }), [id, ship.lb]);
+  const iconUrl = useMemo(() => getShipIconUrl(id), [id]);
 
   useEffect(() => {
     ship.set(
@@ -107,17 +107,19 @@ export const useShip = (id: number) => {
     ) as Record<StatName, number>;
   }, [ship.enhanced, ship.intimacy, ship.level, shipData]);
 
-  if (!computedAttributes || !shipData) {
-    console.warn("Invalid ship", id);
-    return;
-  }
+  return useMemo(() => {
+    if (!computedAttributes || !shipData) {
+      console.warn("Invalid ship", id);
+      return;
+    }
 
-  return {
-    ...ship,
-    ...shipData,
-    attributes: computedAttributes,
-    iconUrl,
-  };
+    return {
+      ...ship,
+      ...shipData,
+      attributes: computedAttributes,
+      iconUrl,
+    };
+  }, [computedAttributes, iconUrl, id, ship, shipData]);
 };
 
 export type Ship = Exclude<ReturnType<typeof useShip>, undefined>;

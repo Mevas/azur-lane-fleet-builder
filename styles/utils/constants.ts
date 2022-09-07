@@ -113,3 +113,10 @@ export const getMaxEquipmentLevel = (rarity: number, tier: number) => {
       return nonMaxTierLevels[rarity];
   }
 };
+
+export const delayBeforeVolley = {
+  dd: 0.16,
+  cl: 0.18,
+  ca: 0.2,
+};
+export const delayAfterVolley = 0.1;
