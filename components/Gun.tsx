@@ -54,6 +54,7 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
             equip.descrip
           ) &&
           !["460mm"].some((term) => equip.name.includes(term)) &&
+          ![14400, 14420, 14440].includes(equip.id) &&
           !/[^\x00-\x7F]/.test(equip.name) &&
           ship.template.equip_1.includes(equip.type)
       )
@@ -129,7 +130,7 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
       options: {
         ammo: 5,
         isCritical: alwaysCrits,
-        // reloadSkillBonus: 1,
+        reloadSkillBonus: 2.4,
       },
     }).against(defender);
   }, [alwaysCrits, gun, ship]);
