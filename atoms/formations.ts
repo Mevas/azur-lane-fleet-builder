@@ -47,7 +47,9 @@ export const formationSelector = selectorFamily<Formation<Fleet>, FormationId>({
           formationsStateFamily(formationsId),
           newFormation as unknown as Formation<FleetId>
         );
-        set(formationIds, (prev) => [...prev, formationsId]);
+        set(formationIds, (current) =>
+          current.includes(formationsId) ? current : [...current, formationsId]
+        );
       }
     },
 });

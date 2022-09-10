@@ -54,7 +54,9 @@ export const fleetSelector = selectorFamily<Fleet, FleetId>({
       } else {
         // creates the atom and update the ids list
         set(fleetsStateFamily(fleetId), newFleet);
-        set(fleetIds, (prev) => [...prev, fleetId]);
+        set(fleetIds, (current) =>
+          current.includes(fleetId) ? current : [...current, fleetId]
+        );
       }
     },
 });
