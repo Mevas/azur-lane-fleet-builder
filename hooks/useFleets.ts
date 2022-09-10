@@ -1,18 +1,18 @@
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { fleetIds, fleetSelector } from "../atoms/fleets";
-import { v4 as uuid } from "uuid";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 import { FormationId } from "../atoms/formations";
+import { useUuid } from "./useUuid";
 
 export const useFleets = () => {
   const ids = useRecoilValue(fleetIds);
-  const newId = useRef(uuid());
-  const setFleet = useSetRecoilState(fleetSelector(newId.current));
+  const [newIdRef, regenId] = useUuid();
+  const setFleet = useSetRecoilState(fleetSelector(newIdRef.current));
 
   const create = useCallback(
     (formationId: FormationId) => {
       setFleet({
-        id: newId.current,
+        id: newIdRef.current,
         name: "test",
         formationId,
         ships: {
@@ -29,9 +29,10 @@ export const useFleets = () => {
         },
       });
 
-      newId.current = uuid();
+      regenId();
     },
-    [setFleet]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [regenId, setFleet]
   );
 
   return useMemo(() => ({ ids, create }), [create, ids]);

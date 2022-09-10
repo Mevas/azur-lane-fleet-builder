@@ -1,5 +1,5 @@
 import { atomFamily } from "recoil";
-import { Equipment } from "../types/ship";
+import { OwnedShip } from "../types/ship";
 import { equipmentData, processedEquipment } from "../styles/utils/data";
 
 const defaultEquipment = Object.fromEntries(
@@ -12,7 +12,7 @@ const defaultEquipment = Object.fromEntries(
   ])
 );
 
-export const ownedEquipmentFamilyState = atomFamily<Equipment, string>({
+export const ownedEquipmentFamilyState = atomFamily<OwnedShip, string>({
   key: "ownedEquipment",
   // default: (id) => defaultEquipment[id],
 });

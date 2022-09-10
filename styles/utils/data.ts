@@ -88,15 +88,13 @@ export const getShipIconUrl = (id: number) =>
   }.png`;
 
 export const getGunIconUrl = (id: number) =>
-  `https://raw.githubusercontent.com/x94fujo6rpg/AzurLaneFleet/master/equips/${
-    (equipmentJson as any)[id]?.icon
-  }.png`;
+  `https://raw.githubusercontent.com/x94fujo6rpg/AzurLaneFleet/master/equips/${equipmentData[id]?.icon}.png`;
 
 export const getBgUrl = (rarity: number) =>
   `https://raw.githubusercontent.com/x94fujo6rpg/AzurLaneFleet/master/ui/bg${rarity}.png`;
 
 export const getEquipmentRarity = (id: number) =>
-  getBgUrl((equipmentJson as any)[id].rarity - 1 || 1);
+  getBgUrl(equipmentData[id].rarity - 1 || 1);
 
 export type EquipmentType = "weapon" | "aux" | undefined;
 

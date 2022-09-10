@@ -1,7 +1,5 @@
 import { atom, atomFamily, DefaultValue, selectorFamily } from "recoil";
-import { Loadout } from "../types/loadout";
-
-export type LoadoutId = string;
+import { Loadout, LoadoutId } from "../types/loadout";
 
 const loadoutsStateFamily = atomFamily<Loadout, LoadoutId>({
   key: "loadouts",

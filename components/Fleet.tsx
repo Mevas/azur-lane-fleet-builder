@@ -14,13 +14,25 @@ export const Fleet = ({ id }: FleetProps) => {
     <div>
       {fleet.name}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
-        <ShipSelector position="main.left" setShip={setShip} />
-        <ShipSelector position="main.center" setShip={setShip} />
-        <ShipSelector position="main.right" setShip={setShip} />
+        <ShipSelector position="main.left" setShip={setShip} fleet={fleet} />
+        <ShipSelector position="main.center" setShip={setShip} fleet={fleet} />
+        <ShipSelector position="main.right" setShip={setShip} fleet={fleet} />
 
-        <ShipSelector position="vanguard.left" setShip={setShip} />
-        <ShipSelector position="vanguard.center" setShip={setShip} />
-        <ShipSelector position="vanguard.right" setShip={setShip} />
+        <ShipSelector
+          position="vanguard.left"
+          setShip={setShip}
+          fleet={fleet}
+        />
+        <ShipSelector
+          position="vanguard.center"
+          setShip={setShip}
+          fleet={fleet}
+        />
+        <ShipSelector
+          position="vanguard.right"
+          setShip={setShip}
+          fleet={fleet}
+        />
       </div>
     </div>
   );

@@ -13,25 +13,11 @@ import {
   getEquipment,
   getEquipmentRarity,
 } from "../styles/utils/data";
-import { getMaxEquipmentLevel } from "../styles/utils/constants";
+import { defender, getMaxEquipmentLevel } from "../styles/utils/constants";
 import { GunIcon } from "./GunIcon";
 
-export const Gun = ({ equippedById }: { equippedById: number }) => {
+export const WeaponSelector = ({ equippedById }: { equippedById: number }) => {
   const ship = useShip(equippedById);
-
-  const defender = {
-    zone: {
-      safe: false,
-      maxDanger: 10,
-    },
-    defender: {
-      level: 120,
-      attributes: {
-        dodge: 75,
-        luck: 25,
-      },
-    },
-  } as const;
 
   const [selectedGun, setSelectedGun] = useState<{
     label: string;
@@ -103,7 +89,7 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
       });
   }, [alwaysCrits, ship]);
 
-  const gun = useMemo(() => {
+  const weapon = useMemo(() => {
     if (!selectedGun) {
       return undefined;
     }
@@ -115,24 +101,9 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
   }, [gunRank, selectedGun]);
 
   useEffect(() => {
-    setGunRank(Math.min(gun?.maxLevel ?? 0, 10));
+    setGunRank(Math.min(weapon?.maxLevel ?? 0, 10));
     // setGunRank(gun?.maxLevel ?? 0);
-  }, [gun?.maxLevel]);
-
-  const damage = useMemo(() => {
-    if (!gun || !ship) {
-      return;
-    }
-
-    return calculateDamage({
-      attacker: ship,
-      gun,
-      options: {
-        ammo: 5,
-        isCritical: alwaysCrits,
-      },
-    }).against(defender);
-  }, [alwaysCrits, gun, ship]);
+  }, [weapon?.maxLevel]);
 
   return (
     <div>
@@ -224,10 +195,10 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
         label="Always crits"
       />
 
-      {gun && (
+      {weapon && (
         <Slider
           min={0}
-          max={gun.maxLevel}
+          max={weapon.maxLevel}
           value={gunRank}
           onChange={(event, newLevel) => {
             if (typeof newLevel !== "number") {
@@ -247,30 +218,11 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
             //   label: "10",
             // },
             {
-              value: gun.maxLevel,
-              label: gun.maxLevel,
+              value: weapon.maxLevel,
+              label: weapon.maxLevel,
             },
           ]}
         />
-      )}
-      <div>{selectedGun?.id}</div>
-      {damage && (
-        <>
-          <div>Base damage: {damage.perBullet.base.toFixed(2)}</div>
-          <div>Average damage: {damage.perBullet.average.toFixed(2)}</div>
-          <div>Shell count: {damage.shells}</div>
-          <div>
-            Reload: {damage.reload.weapon.toFixed(2)}s (in total{" "}
-            {damage.reload.total.toFixed(2)}s)
-          </div>
-          <div>APS: {(1 / damage.reload.total).toFixed(2)}</div>
-          <div>DPS: {damage.dps.toFixed(2)}</div>
-          <div>Crit chance: {(damage.criticalChance * 100).toFixed(2)}%</div>
-          <div>Crit multi: {(damage.criticalMultiplier * 100).toFixed(2)}%</div>
-          <div>Chance to hit: {(damage.accuracy * 100).toFixed(2)}%</div>
-          <div>Expected damage by 30s: {(damage.dps * 30).toFixed(0)}</div>
-          <div>Expected damage by 120s: {(damage.dps * 120).toFixed(0)}</div>
-        </>
       )}
     </div>
   );

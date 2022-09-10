@@ -1,7 +1,7 @@
 import { useRecoilState } from "recoil";
 import { FleetId, fleetSelector } from "../atoms/fleets";
 import { useCallback, useMemo } from "react";
-import { Fleet, FleetShip, Positioning } from "../types/ship";
+import { Fleet, FleetShipState, Positioning } from "../types/ship";
 
 export type FleetPosition = `${keyof Fleet["ships"]}.${keyof Positioning}`;
 
@@ -16,7 +16,7 @@ export const useFleet = (id: FleetId) => {
   const [fleet, setFleet] = useRecoilState(fleetSelector(id));
 
   const setShip = useCallback(
-    (positionString: FleetPosition, ship: FleetShip) => {
+    (positionString: FleetPosition, ship: FleetShipState) => {
       const position = parseFleetPosition(positionString);
 
       setFleet((currentFleet) => ({

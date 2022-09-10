@@ -1,7 +1,7 @@
 import { affinity, nationality } from "../styles/utils/constants";
 import { FleetId } from "../atoms/fleets";
 import { FormationId } from "../atoms/formations";
-import { LoadoutId } from "../atoms/loadouts";
+import { Loadout, LoadoutId } from "./loadout";
 
 export type StatName =
   | "durability"
@@ -89,20 +89,28 @@ export type Enhancement = {
   level_exp: [number, number, number, number, number];
 };
 
+export type ShipId = number;
+
 export type Enhancements = Record<string, Enhancement>;
 
-export type Equipment = {
-  id: number;
+export type OwnedShip = {
+  id: ShipId;
   level: number;
   intimacy: Intimacy;
   lb: number;
   enhanced: boolean;
 };
 
-export type FleetShip = {
-  id: number;
-  loadout: LoadoutId | null;
+export type FleetShipState = {
+  id: ShipId;
+  loadoutId: LoadoutId | null;
 } | null;
+
+export type FleetShip =
+  | (FleetShipState & {
+      loadout: Loadout | null;
+    })
+  | null;
 
 export type Positioning = {
   left: FleetShip;
@@ -111,7 +119,7 @@ export type Positioning = {
 };
 
 export type Fleet = {
-  id: string;
+  id: FleetId;
   name: string;
   formationId: FormationId;
   ships: {
@@ -120,10 +128,10 @@ export type Fleet = {
   };
 };
 
-export type Formation<FleetType extends Fleet | FleetId> = {
+export type Formation = {
   name: string;
   fleets: {
-    surface: FleetType[];
-    sub: FleetType | null;
+    surface: Fleet[];
+    sub: Fleet | null;
   };
 };

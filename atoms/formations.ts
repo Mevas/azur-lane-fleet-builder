@@ -1,10 +1,10 @@
 import { atom, atomFamily, DefaultValue, selectorFamily } from "recoil";
-import { Fleet, Formation } from "../types/ship";
-import { FleetId, fleetIds, fleetSelector } from "./fleets";
+import { Formation } from "../types/ship";
+import { fleetIds, fleetSelector } from "./fleets";
 
 export type FormationId = string;
 
-const formationsStateFamily = atomFamily<Formation<FleetId>, FormationId>({
+const formationsStateFamily = atomFamily<Formation, FormationId>({
   key: "formations",
   default: undefined,
 });
@@ -14,7 +14,7 @@ export const formationIds = atom<FormationId[]>({
   default: [],
 });
 
-export const formationSelector = selectorFamily<Formation<Fleet>, FormationId>({
+export const formationSelector = selectorFamily<Formation, FormationId>({
   key: "formationsSelector",
   get:
     (formationsId) =>
@@ -28,7 +28,7 @@ export const formationSelector = selectorFamily<Formation<Fleet>, FormationId>({
             .map((fleetId) => get(fleetSelector(fleetId)))
             .filter((fleet) => fleet.formationId === formationsId),
         },
-      } as Formation<Fleet>;
+      };
     },
   set:
     (formationsId) =>
@@ -43,10 +43,7 @@ export const formationSelector = selectorFamily<Formation<Fleet>, FormationId>({
         );
       } else {
         // creates the atom and update the ids list
-        set(
-          formationsStateFamily(formationsId),
-          newFormation as unknown as Formation<FleetId>
-        );
+        set(formationsStateFamily(formationsId), newFormation);
         set(formationIds, (current) =>
           current.includes(formationsId) ? current : [...current, formationsId]
         );

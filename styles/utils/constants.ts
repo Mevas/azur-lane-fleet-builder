@@ -120,3 +120,17 @@ export const delayBeforeVolley = {
   ca: 0.2,
 };
 export const delayAfterVolley = 0.1;
+
+export const defender = {
+  zone: {
+    safe: false,
+    maxDanger: 10,
+  },
+  defender: {
+    level: 120,
+    attributes: {
+      dodge: 75,
+      luck: 25,
+    },
+  },
+} as const;

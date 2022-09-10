@@ -1,5 +1,5 @@
 import { atom, atomFamily, DefaultValue, selectorFamily } from "recoil";
-import { Fleet } from "../types/ship";
+import { Fleet, FleetShip, ShipId } from "../types/ship";
 import { loadoutSelector } from "./loadouts";
 
 export type FleetId = string;
@@ -28,19 +28,19 @@ export const fleetSelector = selectorFamily<Fleet, FleetId>({
             type,
             Object.fromEntries(
               Object.entries(positioning).map(([position, ship]) => {
-                if (!ship?.loadout) {
+                if (!ship?.loadoutId) {
                   return [position, ship];
                 }
 
                 return [
                   position,
-                  { ...ship, loadout: get(loadoutSelector(ship.loadout)) },
+                  { ...ship, loadout: get(loadoutSelector(ship.loadoutId)) },
                 ];
               })
             ),
           ])
         ),
-      } as any;
+      } as Fleet;
     },
   set:
     (fleetId) =>
@@ -58,5 +58,21 @@ export const fleetSelector = selectorFamily<Fleet, FleetId>({
           current.includes(fleetId) ? current : [...current, fleetId]
         );
       }
+    },
+});
+
+export const fleetShipSelector = selectorFamily<
+  FleetShip | undefined,
+  { fleetId: FleetId; shipId: ShipId }
+>({
+  key: "fleetShipSelector",
+  get:
+    ({ fleetId, shipId }) =>
+    ({ get }) => {
+      const fleet = get(fleetSelector(fleetId));
+
+      return Object.values(fleet.ships)
+        .flatMap((value) => Object.values(value).flatMap((v) => v))
+        .find((p) => p?.id === shipId);
     },
 });

@@ -1,6 +1,10 @@
 import { Equipment } from "../styles/utils/data";
+import { ShipId } from "./ship";
 
-type Weapon = Equipment<"weapon"> | null;
-type Auxiliary = Equipment<"weapon"> | null;
+export type LoadoutId = string;
 
-export type Loadout = [Weapon, Weapon, Weapon, Auxiliary, Auxiliary];
+export type Loadout = {
+  id: LoadoutId;
+  shipId: ShipId;
+  items: Array<Equipment | null>;
+};
