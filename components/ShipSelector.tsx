@@ -11,7 +11,10 @@ const getName = (ship: ShipData) => {
 };
 
 const options = Object.entries(ships)
-  .filter(([id]) => id.endsWith("1"))
+  .filter(
+    ([id]) =>
+      id.endsWith("1") /* || (id[id.length - 3] === "1" && id.endsWith("4"))*/
+  )
   .map(([, s]) => ({
     label: getName(s),
     id: s.id,
@@ -36,6 +39,13 @@ export const ShipSelector = ({ position, setShip }: ShipSelectorProps) => {
           renderInput={(params) => (
             <TextField {...params} label="Ship" fullWidth />
           )}
+          renderOption={(props, option, state) => {
+            return (
+              <li {...props} key={option.id}>
+                {option.label}
+              </li>
+            );
+          }}
           options={options}
           onChange={(event, newValue) => {
             setShip(
