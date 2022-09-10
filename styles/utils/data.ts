@@ -7,6 +7,7 @@ import weaponJson from "../../data/weapon_property.json";
 import limitBreakJson from "../../data/ship_data_breakout.json";
 import shipTemplateJson from "../../data/ship_data_template.json";
 import barrageTemplateJson from "../../data/barrage_template.json";
+import bulletTemplateJson from "../../data/bullet_template.json";
 
 import {
   WeaponData,
@@ -22,6 +23,7 @@ import { LimitBreakData } from "../../types/limitBreak";
 import { ShipTemplateData } from "../../types/shipTemplate";
 import { getMaxEquipmentLevel } from "./constants";
 import { BarrageTemplate, BarrageTemplateData } from "../../types/barrage";
+import { BulletTemplateData } from "../../types/bullet";
 
 export const ships = Object.fromEntries(
   Object.entries(shipsJson as unknown as ShipData[]).filter(
@@ -36,6 +38,8 @@ export const limitBreakData = limitBreakJson as unknown as LimitBreakData;
 export const shipTemplateData = shipTemplateJson as unknown as ShipTemplateData;
 export const barrageTemplateData =
   barrageTemplateJson as unknown as BarrageTemplateData;
+export const bulletTemplateData =
+  bulletTemplateJson as unknown as BulletTemplateData;
 
 export const groups = skinsJson as Record<
   string,
@@ -93,10 +97,11 @@ export const getBgUrl = (rarity: number) =>
 export const getEquipmentRarity = (id: number) =>
   getBgUrl((equipmentJson as any)[id].rarity - 1 || 1);
 
-export type EquipmentType = "weapon" | "aux";
+export type EquipmentType = "weapon" | "aux" | undefined;
 
 export type WeaponProperties = WeaponDatum &
   WeaponDatumWithBase & {
+    /** Weapon reload time in seconds */
     reload_time: number;
   };
 export type EquipmentStats = EquipmentDatum & EquipmentDatumWithBase;
@@ -104,15 +109,14 @@ export type EquipmentStats = EquipmentDatum & EquipmentDatumWithBase;
 export type GetEquipmentReturn<TType extends EquipmentType> = {
   stats: EquipmentStats;
   properties: TType extends "weapon"
-    ? WeaponProperties & {
-        /** Weapon reload time in seconds */
-        reload_time: number;
-      }
+    ? WeaponProperties
+    : TType extends undefined
+    ? WeaponProperties | undefined
     : undefined;
   maxLevel: number;
 };
 
-const processedEquipment = Object.fromEntries(
+export const processedEquipment = Object.fromEntries(
   Object.entries(equipmentData).map(([_id, equipment]) => {
     const id = +_id;
 
@@ -154,7 +158,7 @@ export const getEquipment = <TType extends EquipmentType>(
   return processedEquipment?.[id]?.[options.level] as GetEquipmentReturn<TType>;
 };
 
-export type Equipment<TType extends EquipmentType> = Exclude<
+export type Equipment<TType extends EquipmentType = undefined> = Exclude<
   ReturnType<typeof getEquipment<TType>>,
   undefined
 >;
@@ -177,3 +181,40 @@ export const getVolleyTime = (barrage: BarrageTemplate) => {
 // console.log(Object.values(equipmentData).filter((d) => d.base));
 
 // console.log(new Set(Object.values(equipmentData).map((e) => e.descrip)));
+
+// const simulations = 1000;
+// const buff = 40;
+// const duration = 10;
+// let rate = 1;
+// const range = (n: number) => Array.from(Array(n).keys());
+// const chances: Record<number, number> = {};
+// for (let sim = 0; sim < simulations; sim++) {
+//   let chance = 0.01;
+//   let sum = 0;
+//   let turnsBuffed = 0;
+//
+//   for (let i = 1; i <= 120; i += rate) {
+//     if (i % rate === 0) {
+//       if (Math.random() < chance) {
+//         turnsBuffed = duration;
+//         rate = 0.9;
+//       }
+//     }
+//     if (turnsBuffed > 0) {
+//       chances[i] = (chances[i] ?? 0) + 1;
+//       sum += buff;
+//       turnsBuffed--;
+//     } else if (turnsBuffed === 0) {
+//       rate = 1;
+//     }
+//   }
+// }
+//
+// console.log(
+//   Object.entries(chances)
+//     .map(
+//       ([moment, chanceSum]) =>
+//         `{${(+moment).toFixed(1)},${+(chanceSum / simulations).toFixed(2)}}`
+//     )
+//     .join(",")
+// );

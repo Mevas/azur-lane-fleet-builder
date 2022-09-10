@@ -130,7 +130,6 @@ export const Gun = ({ equippedById }: { equippedById: number }) => {
       options: {
         ammo: 5,
         isCritical: alwaysCrits,
-        reloadSkillBonus: 2.4,
       },
     }).against(defender);
   }, [alwaysCrits, gun, ship]);

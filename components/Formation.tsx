@@ -12,13 +12,13 @@ export type FormationProps = {
 export const Formation = ({ id }: FormationProps) => {
   const fleets = useFleets();
   const formation = useFormation(id);
-  console.log(formation);
+
   return (
     <div>
       <Button onClick={() => fleets.create(id)}>Create fleet</Button>
 
       {formation.fleets.surface.map((fleet, index) => (
-        <Fleet fleet={fleet} key={index} />
+        <Fleet id={fleet.id} key={index} />
       ))}
     </div>
   );

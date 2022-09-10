@@ -1,3 +1,6 @@
+export type EquipmentId = string;
+
+/* Raw game data */
 export type EquipmentData = Record<number, EquipmentDatum>;
 
 export interface EquipmentDatum {

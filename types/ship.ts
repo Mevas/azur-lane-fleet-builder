@@ -1,6 +1,7 @@
 import { affinity, nationality } from "../styles/utils/constants";
 import { FleetId } from "../atoms/fleets";
 import { FormationId } from "../atoms/formations";
+import { LoadoutId } from "../atoms/loadouts";
 
 export type StatName =
   | "durability"
@@ -90,7 +91,7 @@ export type Enhancement = {
 
 export type Enhancements = Record<string, Enhancement>;
 
-export type ObtainedShip = {
+export type Equipment = {
   id: number;
   level: number;
   intimacy: Intimacy;
@@ -100,16 +101,17 @@ export type ObtainedShip = {
 
 export type FleetShip = {
   id: number;
-  equipment: [];
-};
+  loadout: LoadoutId | null;
+} | null;
 
 export type Positioning = {
-  left?: FleetShip;
-  center?: FleetShip;
-  right?: FleetShip;
+  left: FleetShip;
+  center: FleetShip;
+  right: FleetShip;
 };
 
 export type Fleet = {
+  id: string;
   name: string;
   formationId: FormationId;
   ships: {

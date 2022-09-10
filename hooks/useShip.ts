@@ -1,4 +1,4 @@
-import { Intimacy, ObtainedShip, StatName } from "../types/ship";
+import { Intimacy, Equipment, StatName } from "../types/ship";
 import {
   affinity,
   attributePosition,
@@ -39,7 +39,7 @@ export const useShipState = (id: number) => {
   }
 
   const set = useCallback(
-    <TKey extends keyof ObtainedShip>(key: TKey, value: ObtainedShip[TKey]) =>
+    <TKey extends keyof Equipment>(key: TKey, value: Equipment[TKey]) =>
       setShip((ship) => ({ ...ship, [key]: value })),
     [setShip]
   );

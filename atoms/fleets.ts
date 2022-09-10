@@ -1,5 +1,6 @@
 import { atom, atomFamily, DefaultValue, selectorFamily } from "recoil";
 import { Fleet } from "../types/ship";
+import { loadoutSelector } from "./loadouts";
 
 export type FleetId = string;
 
@@ -18,7 +19,28 @@ export const fleetSelector = selectorFamily<Fleet, FleetId>({
   get:
     (fleetId) =>
     ({ get }) => {
-      return get(fleetsStateFamily(fleetId));
+      const fleet = get(fleetsStateFamily(fleetId));
+
+      return {
+        ...fleet,
+        ships: Object.fromEntries(
+          Object.entries(fleet.ships).map(([type, positioning]) => [
+            type,
+            Object.fromEntries(
+              Object.entries(positioning).map(([position, ship]) => {
+                if (!ship?.loadout) {
+                  return [position, ship];
+                }
+
+                return [
+                  position,
+                  { ...ship, loadout: get(loadoutSelector(ship.loadout)) },
+                ];
+              })
+            ),
+          ])
+        ),
+      } as any;
     },
   set:
     (fleetId) =>

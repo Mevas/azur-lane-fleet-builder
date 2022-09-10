@@ -1,23 +1,26 @@
 import React from "react";
-import { ShipCard } from "./ShipCard";
+import { ShipSelector } from "./ShipSelector";
 import { Fleet as FleetType } from "../types/ship";
+import { useFleet } from "../hooks/useFleet";
 
 export type FleetProps = {
-  fleet: FleetType;
+  id: FleetType["id"];
 };
 
-export const Fleet = ({ fleet }: FleetProps) => {
+export const Fleet = ({ id }: FleetProps) => {
+  const [fleet, setShip] = useFleet(id);
+
   return (
     <div>
       {fleet.name}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
-        <ShipCard />
-        <ShipCard />
-        <ShipCard />
+        <ShipSelector position="main.left" setShip={setShip} />
+        <ShipSelector position="main.center" setShip={setShip} />
+        <ShipSelector position="main.right" setShip={setShip} />
 
-        <ShipCard />
-        <ShipCard />
-        <ShipCard />
+        <ShipSelector position="vanguard.left" setShip={setShip} />
+        <ShipSelector position="vanguard.center" setShip={setShip} />
+        <ShipSelector position="vanguard.right" setShip={setShip} />
       </div>
     </div>
   );
