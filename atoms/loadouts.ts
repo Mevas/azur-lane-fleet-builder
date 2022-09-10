@@ -34,7 +34,9 @@ export const loadoutSelector = selectorFamily<Loadout, LoadoutId>({
       } else {
         // creates the atom and update the ids list
         set(loadoutsStateFamily(loadoutId), newLoadout);
-        set(loadoutIds, (prev) => [...prev, loadoutId]);
+        set(loadoutIds, (current) =>
+          current.includes(loadoutId) ? current : [...current, loadoutId]
+        );
       }
     },
 });
