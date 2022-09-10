@@ -1,6 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import { getEquipmentRarity, getGunIconUrl } from "../styles/utils/data";
+import { getEquipmentRarity, getGunIconUrl } from "../utils/data";
 
 export const GunIcon = ({
   size,

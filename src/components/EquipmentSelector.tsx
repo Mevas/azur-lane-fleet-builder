@@ -1,5 +1,5 @@
 import React from "react";
-import { Equipment } from "../styles/utils/data";
+import { Equipment } from "../utils/data";
 import { WeaponSelector } from "./WeaponSelector";
 import { ShipId } from "../types/ship";
 

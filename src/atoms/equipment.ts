@@ -1,6 +1,6 @@
 import { atomFamily } from "recoil";
 import { OwnedShip } from "../types/ship";
-import { equipmentData, processedEquipment } from "../styles/utils/data";
+import { equipmentData, processedEquipment } from "../utils/data";
 
 const defaultEquipment = Object.fromEntries(
   Object.entries(equipmentData).map(([id]) => [

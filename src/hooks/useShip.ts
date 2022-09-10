@@ -1,15 +1,11 @@
 import { Intimacy, OwnedShip, StatName } from "../types/ship";
-import {
-  affinity,
-  attributePosition,
-  attributes,
-} from "../styles/utils/constants";
+import { affinity, attributePosition, attributes } from "../utils/constants";
 import {
   enhancements,
   getBaseId,
   getShip,
   getShipIconUrl,
-} from "../styles/utils/data";
+} from "../utils/data";
 import { useCallback, useEffect, useMemo } from "react";
 import { useRecoilState } from "recoil";
 import { shipsStateFamily } from "../atoms/ships";

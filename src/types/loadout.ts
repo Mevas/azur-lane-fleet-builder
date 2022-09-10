@@ -1,4 +1,4 @@
-import { Equipment } from "../styles/utils/data";
+import { Equipment } from "../utils/data";
 import { ShipId } from "./ship";
 
 export type LoadoutId = string;

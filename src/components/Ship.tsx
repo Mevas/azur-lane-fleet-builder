@@ -7,14 +7,14 @@ import {
   ToggleButtonGroup,
 } from "@mui/material";
 import { Fleet, Intimacy, ShipId } from "../types/ship";
-import { affinity, defender } from "../styles/utils/constants";
+import { affinity, defender } from "../utils/constants";
 import Slider from "@mui/material/Slider";
 import Image from "next/image";
 import { Loadout } from "./Loadout";
-import { calculateDamage } from "../styles/utils/formulas";
+import { calculateDamage } from "../utils/formulas";
 import { useRecoilValue } from "recoil";
 import { fleetShipSelector } from "../atoms/fleets";
-import { Equipment } from "../styles/utils/data";
+import { Equipment } from "../utils/data";
 
 export type ShipProps = {
   id: ShipId;

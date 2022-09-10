@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { Autocomplete, TextField } from "@mui/material";
 import { Ship } from "./Ship";
 import { Fleet, ShipData } from "../types/ship";
-import { nationality } from "../styles/utils/constants";
-import { ships } from "../styles/utils/data";
+import { nationality } from "../utils/constants";
+import { ships } from "../utils/data";
 import { FleetPosition, SetShip } from "../hooks/useFleet";
 import { useLoadouts } from "../hooks/useLoadouts";
 

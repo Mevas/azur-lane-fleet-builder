@@ -1,6 +1,6 @@
 import { atomFamily } from "recoil";
 import { OwnedShip } from "../types/ship";
-import { ships } from "../styles/utils/data";
+import { ships } from "../utils/data";
 
 const defaultState = {
   level: 100,

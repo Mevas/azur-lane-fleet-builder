@@ -1,4 +1,4 @@
-import { affinity, nationality } from "../styles/utils/constants";
+import { affinity, nationality } from "../utils/constants";
 import { FleetId } from "../atoms/fleets";
 import { FormationId } from "../atoms/formations";
 import { Loadout, LoadoutId } from "./loadout";

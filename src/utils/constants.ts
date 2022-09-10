@@ -1,4 +1,4 @@
-import { ModifiableStat, StatName } from "../../types/ship";
+import { ModifiableStat, StatName } from "../types/ship";
 
 export const nationality = {
   0: "Universal",

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { calculateDamage } from "../styles/utils/formulas";
+import { calculateDamage } from "../utils/formulas";
 import {
   Autocomplete,
   Checkbox,
@@ -12,8 +12,9 @@ import {
   equipmentData,
   getEquipment,
   getEquipmentRarity,
-} from "../styles/utils/data";
-import { defender, getMaxEquipmentLevel } from "../styles/utils/constants";
+  getGunIconUrl,
+} from "../utils/data";
+import { defender, getMaxEquipmentLevel } from "../utils/constants";
 import { GunIcon } from "./GunIcon";
 
 export const WeaponSelector = ({ equippedById }: { equippedById: number }) => {

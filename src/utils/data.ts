@@ -1,29 +1,25 @@
-import { Enhancements, ShipData } from "../../types/ship";
-import shipsJson from "../../data/ship_data_statistics.json";
-import enhancementsJson from "../../data/ship_data_strengthen.json";
-import skinsJson from "../../data/ship_skin_template.json";
-import equipmentJson from "../../data/equip_data_statistics.json";
-import weaponJson from "../../data/weapon_property.json";
-import limitBreakJson from "../../data/ship_data_breakout.json";
-import shipTemplateJson from "../../data/ship_data_template.json";
-import barrageTemplateJson from "../../data/barrage_template.json";
-import bulletTemplateJson from "../../data/bullet_template.json";
+import { Enhancements, ShipData } from "../types/ship";
+import shipsJson from "../data/ship_data_statistics.json";
+import enhancementsJson from "../data/ship_data_strengthen.json";
+import skinsJson from "../data/ship_skin_template.json";
+import equipmentJson from "../data/equip_data_statistics.json";
+import weaponJson from "../data/weapon_property.json";
+import limitBreakJson from "../data/ship_data_breakout.json";
+import shipTemplateJson from "../data/ship_data_template.json";
+import barrageTemplateJson from "../data/barrage_template.json";
+import bulletTemplateJson from "../data/bullet_template.json";
 
-import {
-  WeaponData,
-  WeaponDatum,
-  WeaponDatumWithBase,
-} from "../../types/weapon";
+import { WeaponData, WeaponDatum, WeaponDatumWithBase } from "../types/weapon";
 import {
   EquipmentData,
   EquipmentDatum,
   EquipmentDatumWithBase,
-} from "../../types/equipment";
-import { LimitBreakData } from "../../types/limitBreak";
-import { ShipTemplateData } from "../../types/shipTemplate";
+} from "../types/equipment";
+import { LimitBreakData } from "../types/limitBreak";
+import { ShipTemplateData } from "../types/shipTemplate";
 import { getMaxEquipmentLevel } from "./constants";
-import { BarrageTemplate, BarrageTemplateData } from "../../types/barrage";
-import { BulletTemplateData } from "../../types/bullet";
+import { BarrageTemplate, BarrageTemplateData } from "../types/barrage";
+import { BulletTemplateData } from "../types/bullet";
 
 export const ships = Object.fromEntries(
   Object.entries(shipsJson as unknown as ShipData[]).filter(

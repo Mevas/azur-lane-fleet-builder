@@ -5,7 +5,7 @@ import {
   delayBeforeVolley,
   RELOAD_CONSTANT,
 } from "./constants";
-import { Ship } from "../../hooks/useShip";
+import { Ship } from "../hooks/useShip";
 
 export type CalcualteCriticalChanceParams = {
   attacker: {
