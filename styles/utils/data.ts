@@ -68,7 +68,8 @@ export const getShip = (id: number, options: { lb: number }) => {
     ...ships[shipId],
     base_list: ships[shipId].base_list.map((max, index) =>
       (template as any)[`equip_${index + 1}`].includes(4)
-        ? max + template.hide_buff_list[0]
+        ? max +
+          (template.hide_buff_list[0] < 5 ? template.hide_buff_list[0] : 0)
         : max
     ),
   };
