@@ -1,4 +1,4 @@
-import { ModifiableStat, StatName } from "../types/ship";
+import { Attrs, ModifiableStat, StatName } from "../types/ship";
 
 export const nationality = {
   0: "Universal",
@@ -134,3 +134,5 @@ export const defender = {
     },
   },
 } as const;
+
+export const emptyAttributes: Attrs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];

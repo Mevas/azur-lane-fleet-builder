@@ -6,6 +6,8 @@ import {
   RELOAD_CONSTANT,
 } from "./constants";
 import { Ship } from "../hooks/useShip";
+import { StatName } from "../types/ship";
+import { Loadout } from "../types/loadout";
 
 export type CalcualteCriticalChanceParams = {
   attacker: {
@@ -75,6 +77,7 @@ type NoUndefinedField<T> = {
 export type CalculateDamageParams = {
   gun: Gun;
   attacker: Ship;
+  loadout: Loadout;
   options?: {
     isCritical?: boolean;
     ammo?: number;
@@ -130,7 +133,15 @@ export const calculateDamage = ({
   gun,
   attacker,
   options,
+  loadout,
 }: CalculateDamageParams): Damage => {
+  const totalAttributes = Object.fromEntries(
+    Object.entries(attacker.attributes).map(([stat, value], index) => [
+      stat,
+      value + loadout.bonusAttributes[index],
+    ])
+  ) as Record<StatName, number>;
+
   const ammo = options?.ammo ?? 3; // Default to a 0% buff
 
   const formationBonus = options?.formationBonus ?? -0.05;
@@ -153,8 +164,7 @@ export const calculateDamage = ({
       coefficient *
       attacker.stats.equipment_proficiency[0] *
       (1 +
-        (attacker.attributes["cannon"] / 100) *
-          (1 + formationBonus + fpSkillBonus)) +
+        (totalAttributes.cannon / 100) * (1 + formationBonus + fpSkillBonus)) +
       randomBit) *
     (1 + ammoBuff + skillBuffs) *
     (1 + ammoTypeModifier) *
@@ -167,9 +177,7 @@ export const calculateDamage = ({
   const reloadTime =
     gun.properties.reload_time *
     RELOAD_CONSTANT *
-    Math.sqrt(
-      200 / (attacker.attributes.reload * (1 + reloadSkillBonus) + 100)
-    );
+    Math.sqrt(200 / (totalAttributes.reload * (1 + reloadSkillBonus) + 100));
 
   const barrages = gun.properties.barrage_ID.map(
     (id) => barrageTemplateData[id]
@@ -208,8 +216,8 @@ export const calculateDamage = ({
 
       const accuracy = calculateAccuracy({
         attacker: {
-          hit: attacker.attributes.hit,
-          luck: attacker.attributes.luck,
+          hit: totalAttributes.hit,
+          luck: totalAttributes.luck,
           level: attacker.level,
         },
         defender: {
@@ -222,8 +230,8 @@ export const calculateDamage = ({
       const critRate = !options?.isCritical
         ? calculateCriticalChance({
             attacker: {
-              hit: attacker.attributes.hit,
-              luck: attacker.attributes.luck,
+              hit: totalAttributes.hit,
+              luck: totalAttributes.luck,
               level: attacker.level,
               bonus: 0,
             },

@@ -1,5 +1,6 @@
 import { useContext, useMemo } from "react";
 import { LoadoutContext } from "../providers/loadout-context";
+import _ from "lodash";
 
 export const useLoadout = () => {
   const context = useContext(LoadoutContext);
@@ -8,11 +9,7 @@ export const useLoadout = () => {
   }
 
   return useMemo(
-    () =>
-      [
-        context.loadout,
-        { setLoadout: context.setLoadout, setItem: context.setItem },
-      ] as const,
-    [context.loadout, context.setItem, context.setLoadout]
+    () => [context.loadout, { ..._.omit(context, "loadout") }] as const,
+    [context]
   );
 };

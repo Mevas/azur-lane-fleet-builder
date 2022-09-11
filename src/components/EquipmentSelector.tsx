@@ -5,7 +5,7 @@ import {
   getEquipmentRarity,
   processedEquipment,
 } from "../utils/data";
-import { ShipId } from "../types/ship";
+import { ShipId, StatName } from "../types/ship";
 import Slider from "@mui/material/Slider";
 import { Autocomplete, TextField } from "@mui/material";
 import { GunIcon } from "./GunIcon";
@@ -197,6 +197,27 @@ export const EquipmentSelector = ({
             }}
           />
         </div>
+
+        <div>
+          {equipment &&
+            [1, 2, 3].map((index) => {
+              const attributeName = (equipment.stats as any)[
+                `attribute_${index}`
+              ] as StatName | undefined;
+
+              if (!attributeName) {
+                return;
+              }
+
+              return (
+                <div key={index}>
+                  {attributeName}:{" "}
+                  {+(equipment.stats as any)[`value_${index}`] ?? 0}
+                </div>
+              );
+            })}
+        </div>
+
         {selectedEquipment && <GunIcon id={selectedEquipment.id} size={116} />}
       </div>
 

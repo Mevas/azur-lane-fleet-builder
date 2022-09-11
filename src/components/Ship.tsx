@@ -6,8 +6,8 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import { Attrs, Intimacy, ShipId, StatName } from "../types/ship";
-import { affinity, attributes, defender } from "../utils/constants";
+import { Intimacy, ShipId } from "../types/ship";
+import { affinity, defender } from "../utils/constants";
 import Slider from "@mui/material/Slider";
 import Image from "next/image";
 import { Loadout } from "./Loadout";
@@ -33,59 +33,33 @@ export const Ship = ({ id }: ShipProps) => {
   const weapon = fleetShip?.loadout?.items[0] as Equipment<"weapon"> | null;
 
   const damage = useMemo(() => {
-    if (!weapon || !ship) {
+    if (!weapon || !ship || !fleetShip?.loadout) {
       return;
     }
 
     return calculateDamage({
       attacker: ship,
       gun: weapon,
+      loadout: fleetShip.loadout,
       options: {
         ammo: 5,
       },
     }).against(defender);
-  }, [weapon, ship]);
-
-  const bonusAttributes: Attrs = useMemo(() => {
-    const attrs: Attrs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    if (!fleetShip?.loadout) {
-      return attrs;
-    }
-    const loadout = fleetShip.loadout;
-
-    loadout.items.forEach((item) => {
-      if (!item) {
-        return;
-      }
-      [1, 2, 3].forEach((index) => {
-        const attributeName = (item.stats as any)[`attribute_${index}`] as
-          | StatName
-          | undefined;
-
-        if (!attributeName) {
-          return;
-        }
-
-        attrs[attributes[attributeName][1]] +=
-          +(item.stats as any)[`value_${index}`] ?? 0;
-      });
-    });
-
-    return attrs;
-  }, [fleetShip?.loadout]);
+  }, [weapon, ship, fleetShip?.loadout]);
 
   const totalAttributes = useMemo(() => {
-    if (!ship?.attributes) {
+    if (!ship?.attributes || !fleetShip?.loadout) {
       return ship?.attributes;
     }
 
     return Object.fromEntries(
       Object.entries(ship?.attributes).map(([stat, value], index) => [
         stat,
-        value + bonusAttributes[index],
+        value + fleetShip.loadout!.bonusAttributes[index],
       ])
     );
-  }, [bonusAttributes, ship?.attributes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fleetShip?.loadout?.bonusAttributes, ship?.attributes]);
 
   if (!ship || !fleetShip?.loadout) {
     return null;

@@ -37,6 +37,7 @@ export const LoadoutProvider = ({
     },
     [setLoadout]
   );
+
   const value = useMemo(
     () => ({ loadout, setLoadout, setItem }),
     [loadout, setLoadout, setItem]

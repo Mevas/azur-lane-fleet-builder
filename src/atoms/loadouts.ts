@@ -1,5 +1,7 @@
 import { atom, atomFamily, DefaultValue, selectorFamily } from "recoil";
 import { Loadout, LoadoutId } from "../types/loadout";
+import { Attrs, StatName } from "../types/ship";
+import { attributes, emptyAttributes } from "../utils/constants";
 
 const loadoutsStateFamily = atomFamily<Loadout, LoadoutId>({
   key: "loadouts",
@@ -16,7 +18,29 @@ export const loadoutSelector = selectorFamily<Loadout, LoadoutId>({
   get:
     (loadoutId) =>
     ({ get }) => {
-      return get(loadoutsStateFamily(loadoutId));
+      const loadout = get(loadoutsStateFamily(loadoutId));
+
+      const bonusAttributes: Attrs = [...emptyAttributes];
+      loadout.items.forEach((item) => {
+        if (!item) {
+          return;
+        }
+
+        [1, 2, 3].forEach((index) => {
+          const attributeName = (item.stats as any)[`attribute_${index}`] as
+            | StatName
+            | undefined;
+
+          if (!attributeName) {
+            return;
+          }
+
+          bonusAttributes[attributes[attributeName][1]] +=
+            +(item.stats as any)[`value_${index}`] ?? 0;
+        });
+      });
+
+      return { ...loadout, bonusAttributes };
     },
   set:
     (loadoutId) =>

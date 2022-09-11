@@ -3,6 +3,7 @@ import { useCallback, useMemo } from "react";
 import { loadoutIds, loadoutSelector } from "../atoms/loadouts";
 import { ShipId } from "../types/ship";
 import { useUuid } from "./useUuid";
+import { emptyAttributes } from "../utils/constants";
 
 export const useLoadouts = () => {
   const ids = useRecoilValue(loadoutIds);
@@ -16,6 +17,7 @@ export const useLoadouts = () => {
         id: loadoutId,
         shipId,
         items: [null, null, null, null, null],
+        bonusAttributes: [...emptyAttributes],
       });
 
       regenId();

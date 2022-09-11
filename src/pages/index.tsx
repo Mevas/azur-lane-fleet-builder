@@ -17,7 +17,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/public/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
+      <main className={styles.main} style={{ paddingBottom: 500 }}>
         {/*{ships.map((ship) => (*/}
         {/*  <div key={ship.id}>{ship.names.en}</div>*/}
         {/*))}*/}
