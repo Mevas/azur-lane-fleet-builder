@@ -10,12 +10,19 @@ export type LoadoutProps = {
 };
 
 export const Loadout = ({ id, shipId }: LoadoutProps) => {
-  const [loadout] = useLoadout(id);
+  const [loadout, { setItem }] = useLoadout(id);
 
   return (
     <div>
       {loadout.items.map((item, index) => (
-        <EquipmentSelector item={item} shipId={shipId} key={index} />
+        <EquipmentSelector
+          item={item}
+          shipId={shipId}
+          key={index}
+          setItem={setItem}
+          loadout={loadout}
+          position={index}
+        />
       ))}
     </div>
   );

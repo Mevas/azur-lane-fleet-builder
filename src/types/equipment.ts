@@ -1,7 +1,10 @@
 export type EquipmentId = string;
 
 /* Raw game data */
-export type EquipmentData = Record<number, EquipmentDatum>;
+export type EquipmentData = Record<
+  number,
+  EquipmentDatum | EquipmentDatumWithBase
+>;
 
 export interface EquipmentDatum {
   ammo: number;

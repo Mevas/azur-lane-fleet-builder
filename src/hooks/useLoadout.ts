@@ -19,3 +19,5 @@ export const useLoadout = (id: LoadoutId) => {
 
   return [loadout, { setLoadout, setItem }] as const;
 };
+
+export type SetItem = ReturnType<typeof useLoadout>[1]["setItem"];

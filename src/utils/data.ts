@@ -8,6 +8,7 @@ import limitBreakJson from "../data/ship_data_breakout.json";
 import shipTemplateJson from "../data/ship_data_template.json";
 import barrageTemplateJson from "../data/barrage_template.json";
 import bulletTemplateJson from "../data/bullet_template.json";
+import equipmentTemplateJson from "../data/equip_data_template.json";
 
 import { WeaponData, WeaponDatum, WeaponDatumWithBase } from "../types/weapon";
 import {
@@ -20,6 +21,11 @@ import { ShipTemplateData } from "../types/shipTemplate";
 import { getMaxEquipmentLevel } from "./constants";
 import { BarrageTemplate, BarrageTemplateData } from "../types/barrage";
 import { BulletTemplateData } from "../types/bullet";
+import {
+  EquipmentTemplateData,
+  EquipmentTemplateDatum,
+  EquipmentTemplateDatumWithBase,
+} from "../types/equipmentTemplate";
 
 export const ships = Object.fromEntries(
   Object.entries(shipsJson as unknown as ShipData[]).filter(
@@ -36,6 +42,8 @@ export const barrageTemplateData =
   barrageTemplateJson as unknown as BarrageTemplateData;
 export const bulletTemplateData =
   bulletTemplateJson as unknown as BulletTemplateData;
+export const equipmentTemplateData =
+  equipmentTemplateJson as unknown as EquipmentTemplateData;
 
 export const groups = skinsJson as Record<
   string,
@@ -89,9 +97,6 @@ export const getGunIconUrl = (id: number) =>
 export const getBgUrl = (rarity: number) =>
   `https://raw.githubusercontent.com/x94fujo6rpg/AzurLaneFleet/master/ui/bg${rarity}.png`;
 
-export const getEquipmentRarity = (id: number) =>
-  getBgUrl(equipmentData[id].rarity - 1 || 1);
-
 export type EquipmentType = "weapon" | "aux" | undefined;
 
 export type WeaponProperties = WeaponDatum &
@@ -100,6 +105,12 @@ export type WeaponProperties = WeaponDatum &
     reload_time: number;
   };
 export type EquipmentStats = EquipmentDatum & EquipmentDatumWithBase;
+export type EquipmentTemplate = EquipmentTemplateDatum &
+  EquipmentTemplateDatumWithBase;
+
+const isBase = (
+  pet: EquipmentDatum | EquipmentDatumWithBase
+): pet is EquipmentDatum => (pet as EquipmentDatumWithBase).base === undefined;
 
 export type GetEquipmentReturn<TType extends EquipmentType> = {
   stats: EquipmentStats;
@@ -109,42 +120,72 @@ export type GetEquipmentReturn<TType extends EquipmentType> = {
     ? WeaponProperties | undefined
     : undefined;
   maxLevel: number;
+  template: EquipmentTemplate;
 };
 
 export const processedEquipment = Object.fromEntries(
-  Object.entries(equipmentData).map(([_id, equipment]) => {
-    const id = +_id;
+  (
+    Object.entries(equipmentData).filter(([, equip]) => isBase(equip)) as Array<
+      [string, EquipmentDatum]
+    >
+  )
+    .filter(
+      ([, equip]) =>
+        equip.name &&
+        equip.name !== "0" &&
+        ![
+          "Prologue",
+          "Default gear",
+          "Prototype Gear",
+          "序章用",
+          "默认装备",
+        ].includes(equip.descrip) &&
+        !["460mm"].some((term) => equip.name.includes(term)) &&
+        ![14400, 14420, 14440].includes(equip.id) &&
+        !/[^\x00-\x7F]/.test(equip.name)
+    )
+    .map(([_id, equipment]) => {
+      const id = +_id;
 
-    const maxLevel = getMaxEquipmentLevel(equipment.rarity, equipment.tech);
+      const maxLevel = getMaxEquipmentLevel(equipment.rarity, equipment.tech);
 
-    const equipmentLevels = [];
-    const weapon = weaponData[id];
+      const equipmentLevels = [];
+      const weapon = weaponData[id];
+      const baseTemplate = equipmentTemplateData[id] as EquipmentTemplateDatum;
 
-    for (let level = 0; level <= maxLevel; level++) {
-      const properties = weapon
-        ? ({
-            ...weapon,
-            ...weaponData[id + level],
-          } as WeaponProperties)
-        : undefined;
+      for (let level = 0; level <= maxLevel; level++) {
+        const properties = weapon
+          ? ({
+              ...weapon,
+              ...weaponData[id + level],
+            } as WeaponProperties)
+          : undefined;
 
-      if (properties) {
-        properties.reload_time = properties.reload_max / 150;
+        if (properties) {
+          properties.reload_time = properties.reload_max / 150;
+        }
+
+        const template = equipmentTemplateData[id + level];
+        equipmentLevels.push({
+          maxLevel: getMaxEquipmentLevel(equipment.rarity, equipment.tech),
+          stats: {
+            ...equipment,
+            ...equipmentData[id + level],
+          } as EquipmentStats,
+          properties,
+          template: {
+            ...baseTemplate,
+            ...template,
+          } as EquipmentTemplate,
+        });
       }
 
-      equipmentLevels.push({
-        maxLevel: getMaxEquipmentLevel(equipment.rarity, equipment.tech),
-        stats: {
-          ...equipment,
-          ...equipmentData[id + level],
-        },
-        properties,
-      });
-    }
-
-    return [id, equipmentLevels];
-  })
+      return [id, equipmentLevels];
+    })
 );
+
+export const getEquipmentRarity = (id: number) =>
+  getBgUrl(processedEquipment[id][0].stats.rarity - 1 || 1);
 
 export const getEquipment = <TType extends EquipmentType>(
   id: number,
@@ -173,7 +214,7 @@ export const getVolleyTime = (barrage: BarrageTemplate) => {
 //   .filter((d) => !d.base)
 //   .map((v) => Object.keys(v));
 // // console.log(keys.reduce((acc, curr) => intersection(acc, curr), keys[0]));
-// console.log(Object.values(equipmentData).filter((d) => d.base));
+// console.log(Object.values(equipmentTemplateData).filter((d) => d.base));
 
 // console.log(new Set(Object.values(equipmentData).map((e) => e.descrip)));
 

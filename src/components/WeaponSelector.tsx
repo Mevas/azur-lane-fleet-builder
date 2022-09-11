@@ -1,21 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { calculateDamage } from "../utils/formulas";
-import {
-  Autocomplete,
-  Checkbox,
-  FormControlLabel,
-  TextField,
-} from "@mui/material";
+import { Checkbox, FormControlLabel } from "@mui/material";
 import { useShip } from "../hooks/useShip";
-import Slider from "@mui/material/Slider";
-import {
-  equipmentData,
-  getEquipment,
-  getEquipmentRarity,
-  getGunIconUrl,
-} from "../utils/data";
-import { defender, getMaxEquipmentLevel } from "../utils/constants";
-import { GunIcon } from "./GunIcon";
+import { getEquipment, processedEquipment } from "../utils/data";
+import { defender } from "../utils/constants";
+
+const selectorOptions = Object.values(processedEquipment).map(
+  (levels) => levels[0]
+);
 
 export const WeaponSelector = ({ equippedById }: { equippedById: number }) => {
   const ship = useShip(equippedById);
@@ -32,22 +24,11 @@ export const WeaponSelector = ({ equippedById }: { equippedById: number }) => {
       return [];
     }
 
-    return Object.values(equipmentData)
-      .filter(
-        (equip) =>
-          equip.name &&
-          equip.name !== "0" &&
-          !["Prologue", "Default gear", "序章用", "默认装备"].includes(
-            equip.descrip
-          ) &&
-          !["460mm"].some((term) => equip.name.includes(term)) &&
-          ![14400, 14420, 14440].includes(equip.id) &&
-          !/[^\x00-\x7F]/.test(equip.name) &&
-          ship.template.equip_1.includes(equip.type)
-      )
+    return selectorOptions
+      .filter((equip) => ship.template.equip_1.includes(equip.stats.type))
       .map((equip) => ({
-        label: equip.name,
-        id: equip.id,
+        label: equip.stats.name,
+        id: equip.stats.id,
       }))
       .sort((equip1, equip2) => {
         let gun1 = getEquipment(equip1.id, { level: 0, type: "weapon" });
@@ -90,102 +71,8 @@ export const WeaponSelector = ({ equippedById }: { equippedById: number }) => {
       });
   }, [alwaysCrits, ship]);
 
-  const weapon = useMemo(() => {
-    if (!selectedGun) {
-      return undefined;
-    }
-
-    return getEquipment(selectedGun.id, {
-      level: gunRank,
-      type: "weapon",
-    });
-  }, [gunRank, selectedGun]);
-
-  useEffect(() => {
-    setGunRank(Math.min(weapon?.maxLevel ?? 0, 10));
-    // setGunRank(gun?.maxLevel ?? 0);
-  }, [weapon?.maxLevel]);
-
   return (
     <div>
-      <div style={{ width: 200 }}>
-        <Autocomplete
-          renderInput={(params) => (
-            <TextField {...params} label="Main gun" fullWidth />
-          )}
-          renderOption={(props, option) => {
-            const equipment = getEquipment(option.id, { level: 0 });
-
-            if (!equipment) {
-              console.warn("No equip found", option.id);
-              return null;
-            }
-
-            const gun = getEquipment(option.id, {
-              level: Math.min(
-                10,
-                getMaxEquipmentLevel(
-                  equipmentData[option.id].rarity,
-                  equipmentData[option.id].tech
-                ) ?? 0
-              ),
-              type: "weapon",
-            });
-
-            const dmg =
-              ship && gun
-                ? calculateDamage({
-                    attacker: ship,
-                    gun,
-                    options: {
-                      ammo: 5,
-                      isCritical: alwaysCrits,
-                    },
-                  }).against(defender)
-                : undefined;
-
-            return (
-              <li
-                {...props}
-                key={option.id}
-                style={{
-                  background: `url(${getEquipmentRarity(
-                    option.id
-                  )}) no-repeat center center / cover`,
-                }}
-              >
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "50px auto",
-                    alignItems: "center",
-                  }}
-                >
-                  <GunIcon id={option.id} size={50} noBackground />
-                  <div>
-                    {option.label}
-                    <span style={{ color: "red" }}>
-                      {dmg && ` - DPS: ${dmg.dps.toFixed(0)}`}
-                    </span>
-                  </div>
-                </div>
-              </li>
-            );
-          }}
-          options={gunOptions}
-          onChange={(event, newValue) => {
-            setSelectedGun(newValue);
-          }}
-          value={selectedGun}
-          filterOptions={(options, state) => {
-            return options.filter((o) =>
-              o.label.toLowerCase().includes(state.inputValue)
-            );
-          }}
-        />
-      </div>
-      {selectedGun && <GunIcon id={selectedGun.id} size={116} />}
-
       <FormControlLabel
         control={
           <Checkbox
@@ -195,36 +82,6 @@ export const WeaponSelector = ({ equippedById }: { equippedById: number }) => {
         }
         label="Always crits"
       />
-
-      {weapon && (
-        <Slider
-          min={0}
-          max={weapon.maxLevel}
-          value={gunRank}
-          onChange={(event, newLevel) => {
-            if (typeof newLevel !== "number") {
-              return;
-            }
-
-            setGunRank(newLevel);
-          }}
-          valueLabelDisplay="auto"
-          marks={[
-            {
-              value: 0,
-              label: "0",
-            },
-            // {
-            //   value: 10,
-            //   label: "10",
-            // },
-            {
-              value: weapon.maxLevel,
-              label: weapon.maxLevel,
-            },
-          ]}
-        />
-      )}
     </div>
   );
 };
