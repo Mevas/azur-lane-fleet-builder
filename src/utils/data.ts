@@ -121,6 +121,7 @@ export type GetEquipmentReturn<TType extends EquipmentType> = {
     : undefined;
   maxLevel: number;
   template: EquipmentTemplate;
+  level: number;
 };
 
 export const processedEquipment = Object.fromEntries(
@@ -168,6 +169,7 @@ export const processedEquipment = Object.fromEntries(
         const template = equipmentTemplateData[id + level];
         equipmentLevels.push({
           maxLevel: getMaxEquipmentLevel(equipment.rarity, equipment.tech),
+          level,
           stats: {
             ...equipment,
             ...equipmentData[id + level],

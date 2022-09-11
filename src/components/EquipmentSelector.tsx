@@ -30,6 +30,7 @@ export const EquipmentSelector = ({
   shipId,
   loadout,
   position,
+  setItem,
 }: EquipmentSelectorProps) => {
   const ship = useShip(shipId);
   const [selectedEquipment, setSelectedEquipment] = useState<{
@@ -108,6 +109,16 @@ export const EquipmentSelector = ({
   useEffect(() => {
     setLevel(Math.min(equipment?.maxLevel ?? 0, 10));
   }, [equipment?.maxLevel]);
+
+  useEffect(() => {
+    setItem(
+      position,
+      selectedEquipment?.id
+        ? processedEquipment[selectedEquipment.id][level]
+        : null
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [level, position, selectedEquipment]);
 
   return (
     <div>

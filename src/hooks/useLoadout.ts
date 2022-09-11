@@ -6,7 +6,7 @@ import { Equipment } from "../utils/data";
 export const useLoadout = (id: LoadoutId) => {
   const [loadout, setLoadout] = useRecoilState(loadoutSelector(id));
 
-  const setItem = (position: number, item: Equipment) => {
+  const setItem = (position: number, item: Equipment | null) => {
     setLoadout((currVal) => {
       return {
         ...currVal,
