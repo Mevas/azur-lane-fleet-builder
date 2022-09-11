@@ -98,8 +98,7 @@ export const useShip = (id: number) => {
 
   return useMemo(() => {
     if (!computedAttributes || !shipData) {
-      console.warn("Invalid ship", id);
-      return;
+      throw Error(`Invalid ship: ${id}`);
     }
 
     return {

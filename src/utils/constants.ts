@@ -136,3 +136,21 @@ export const defender = {
 } as const;
 
 export const emptyAttributes: Attrs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+export const equipmentTypes = {
+  1: "DD Guns",
+  2: "CL Guns",
+  3: "CA Guns",
+  4: "BB Guns",
+  5: "Torpedoes",
+  6: "Anti-Air Guns",
+  7: "Fighters",
+  8: "Torpedo Bombers",
+  9: "Dive Bombers",
+  10: "Auxiliary Equipment",
+  11: "CB Guns",
+  12: "Seaplanes",
+  13: "Submarine Torpedoes",
+  14: "Auxiliary Equipment",
+  18: "Goods",
+} as const;

@@ -12,6 +12,7 @@ import { GunIcon } from "./GunIcon";
 import { Loadout } from "../types/loadout";
 import { useShip } from "../hooks/useShip";
 import { useLoadout } from "../hooks/useLoadout";
+import { equipmentTypes } from "../utils/constants";
 
 export type EquipmentSelectorProps = {
   item: Equipment | null;
@@ -123,7 +124,17 @@ export const EquipmentSelector = ({
         <div style={{ width: 200 }}>
           <Autocomplete
             renderInput={(params) => (
-              <TextField {...params} label="Main gun" fullWidth />
+              <TextField
+                {...params}
+                label={[
+                  ...new Set(
+                    (ship.template as any)[`equip_${position + 1}`]
+                      .map((typeId: number) => (equipmentTypes as any)[typeId])
+                      .filter((equipType: string | undefined) => equipType)
+                  ),
+                ].join(", ")}
+                fullWidth
+              />
             )}
             isOptionEqualToValue={(option, value) => option.id === value.id}
             renderOption={(props, option) => {
