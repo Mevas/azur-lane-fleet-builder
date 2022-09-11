@@ -12,7 +12,9 @@ import { GunIcon } from "./GunIcon";
 import { Loadout } from "../types/loadout";
 import { useShip } from "../hooks/useShip";
 import { useLoadout } from "../hooks/useLoadout";
-import { equipmentTypes } from "../utils/constants";
+import { defender, equipmentTypes } from "../utils/constants";
+import { calculateDamage } from "../utils/formulas";
+import { isWeapon } from "../utils/guards";
 
 export type EquipmentSelectorProps = {
   item: Equipment | null;
@@ -36,6 +38,7 @@ export const EquipmentSelector = ({
     id: number;
   } | null>(null);
   const [level, setLevel] = useState(0);
+  const [loadout] = useLoadout();
 
   const equipmentOptions = useMemo(() => {
     if (!ship) {
@@ -52,47 +55,50 @@ export const EquipmentSelector = ({
       .map((equip) => ({
         label: equip.stats.name,
         id: equip.stats.id,
-      }));
-    // .sort((equip1, equip2) => {
-    //   let gun1 = getEquipment(equip1.id, { level: 0, type: "weapon" });
-    //   let gun2 = getEquipment(equip2.id, { level: 0, type: "weapon" });
-    //   if (!gun1 || !gun2) {
-    //     return 0;
-    //   }
-    //   gun1 = getEquipment(equip1.id, {
-    //     level: Math.min(gun1.maxLevel, 10),
-    //     type: "weapon",
-    //   })!;
-    //   gun2 = getEquipment(equip2.id, {
-    //     level: Math.min(gun2.maxLevel, 10),
-    //     type: "weapon",
-    //   })!;
-    //
-    //   if (!gun1 || !gun2) {
-    //     return 0;
-    //   }
-    //
-    //   const dmg1 = calculateDamage({
-    //     attacker: ship,
-    //     gun: gun1,
-    //     options: {
-    //       ammo: 5,
-    //       // isCritical: alwaysCrits,
-    //     },
-    //   }).against(defender);
-    //
-    //   const dmg2 = calculateDamage({
-    //     attacker: ship,
-    //     gun: gun2,
-    //     options: {
-    //       ammo: 5,
-    //       // isCritical: alwaysCrits,
-    //     },
-    //   }).against(defender);
-    //
-    //   return dmg2.dps - dmg1.dps;
-    // });
-  }, [position, ship]);
+      }))
+      .sort((equip1, equip2) => {
+        let e1 = getEquipment(equip1.id, {
+          level: Math.min(10, processedEquipment[equip1.id][0].maxLevel),
+        });
+        let e2 = getEquipment(equip2.id, {
+          level: Math.min(10, processedEquipment[equip2.id][0].maxLevel),
+        });
+
+        if (!e1 || !e2 || (!loadout.items[0] && position !== 0)) {
+          return 0;
+        }
+
+        const dmg1 = calculateDamage({
+          attacker: ship,
+          loadout: {
+            ...loadout,
+            items: loadout.items.map((item, index) =>
+              index === position ? e1! : item
+            ),
+          },
+          options: {
+            ammo: 5,
+            // isCritical: alwaysCrits,
+          },
+        }).against(defender);
+
+        const dmg2 = calculateDamage({
+          attacker: ship,
+          loadout: {
+            ...loadout,
+            items: loadout.items.map((item, index) =>
+              index === position ? e2! : item
+            ),
+          },
+          options: {
+            ammo: 5,
+            // isCritical: alwaysCrits,
+          },
+        }).against(defender);
+
+        return dmg2.dps - dmg1.dps;
+      });
+  }, [loadout, position, ship]);
 
   const equipment = useMemo(() => {
     if (!selectedEquipment?.id) {
@@ -118,6 +124,20 @@ export const EquipmentSelector = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [level, position, selectedEquipment]);
 
+  const damage = useMemo(() => {
+    if (!ship || !loadout || !isWeapon(loadout.items[0])) {
+      return;
+    }
+
+    return calculateDamage({
+      attacker: ship,
+      loadout,
+      options: {
+        ammo: 5,
+      },
+    }).against(defender);
+  }, [loadout, ship]);
+
   return (
     <div>
       <div style={{ display: "grid", gridAutoFlow: "column" }}>
@@ -138,35 +158,33 @@ export const EquipmentSelector = ({
             )}
             isOptionEqualToValue={(option, value) => option.id === value.id}
             renderOption={(props, option) => {
-              const equipment = getEquipment(option.id, { level: 0 });
+              const equipment = getEquipment(option.id, {
+                level: Math.min(10, processedEquipment[option.id][0].maxLevel),
+              });
 
               if (!equipment) {
                 console.warn("No equip found", option.id);
                 return null;
               }
 
-              // const gun = getEquipment(option.id, {
-              //   level: Math.min(
-              //     10,
-              //     getMaxEquipmentLevel(
-              //       equipmentData[option.id].rarity,
-              //       equipmentData[option.id].tech
-              //     ) ?? 0
-              //   ),
-              //   type: "weapon",
-              // });
-              //
-              // const dmg =
-              //   ship && gun
-              //     ? calculateDamage({
-              //         attacker: ship,
-              //         gun,
-              //         options: {
-              //           ammo: 5,
-              //           // isCritical: alwaysCrits,
-              //         },
-              //       }).against(defender)
-              //     : undefined;
+              const dmg =
+                ship && equipment && (loadout.items[0] || position === 0)
+                  ? calculateDamage({
+                      attacker: ship,
+                      loadout: {
+                        ...loadout,
+                        items: loadout.items.map((item, index) =>
+                          index === position ? equipment : item
+                        ),
+                      },
+                      options: {
+                        ammo: 5,
+                        // isCritical: alwaysCrits,
+                      },
+                    }).against(defender)
+                  : undefined;
+
+              const dpsDiff = dmg ? dmg.dps - (damage?.dps ?? 0) : undefined;
 
               return (
                 <li
@@ -188,9 +206,21 @@ export const EquipmentSelector = ({
                     <GunIcon id={option.id} size={50} noBackground />
                     <div>
                       {option.label}
-                      {/*<span style={{ color: "red" }}>*/}
-                      {/*  {dmg && ` - DPS: ${dmg.dps.toFixed(0)}`}*/}
-                      {/*</span>*/}
+                      {!!dpsDiff && dpsDiff.toFixed(0) !== "0" && (
+                        <span
+                          style={{ color: dpsDiff > 0 ? "#006400" : "red" }}
+                        >
+                          {` - DPS: ${dpsDiff > 0 ? "+" : "-"}${dpsDiff.toFixed(
+                            0
+                          )}`}
+                          {damage && (
+                            <>
+                              ({dpsDiff > 0 ? "+" : "-"}
+                              {((dpsDiff * 100) / damage.dps).toFixed(1)}%)
+                            </>
+                          )}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </li>

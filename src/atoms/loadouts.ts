@@ -13,6 +13,30 @@ export const loadoutIds = atom<LoadoutId[]>({
   default: [],
 });
 
+export const calculateBonusAttributes = (loadout: Loadout) => {
+  const bonusAttributes: Attrs = [...emptyAttributes];
+  loadout.items.forEach((item) => {
+    if (!item) {
+      return;
+    }
+
+    [1, 2, 3].forEach((index) => {
+      const attributeName = (item.stats as any)[`attribute_${index}`] as
+        | StatName
+        | undefined;
+
+      if (!attributeName) {
+        return;
+      }
+
+      bonusAttributes[attributes[attributeName][1]] +=
+        +(item.stats as any)[`value_${index}`] ?? 0;
+    });
+  });
+
+  return bonusAttributes;
+};
+
 export const loadoutSelector = selectorFamily<Loadout, LoadoutId>({
   key: "loadoutSelector",
   get:
@@ -20,25 +44,7 @@ export const loadoutSelector = selectorFamily<Loadout, LoadoutId>({
     ({ get }) => {
       const loadout = get(loadoutsStateFamily(loadoutId));
 
-      const bonusAttributes: Attrs = [...emptyAttributes];
-      loadout.items.forEach((item) => {
-        if (!item) {
-          return;
-        }
-
-        [1, 2, 3].forEach((index) => {
-          const attributeName = (item.stats as any)[`attribute_${index}`] as
-            | StatName
-            | undefined;
-
-          if (!attributeName) {
-            return;
-          }
-
-          bonusAttributes[attributes[attributeName][1]] +=
-            +(item.stats as any)[`value_${index}`] ?? 0;
-        });
-      });
+      const bonusAttributes = calculateBonusAttributes(loadout);
 
       return { ...loadout, bonusAttributes };
     },

@@ -109,8 +109,9 @@ export type EquipmentTemplate = EquipmentTemplateDatum &
   EquipmentTemplateDatumWithBase;
 
 const isBase = (
-  pet: EquipmentDatum | EquipmentDatumWithBase
-): pet is EquipmentDatum => (pet as EquipmentDatumWithBase).base === undefined;
+  equipment: EquipmentDatum | EquipmentDatumWithBase
+): equipment is EquipmentDatum =>
+  (equipment as EquipmentDatumWithBase).base === undefined;
 
 export type GetEquipmentReturn<TType extends EquipmentType> = {
   stats: EquipmentStats;

@@ -1,5 +1,5 @@
 import { average, clamp } from "./numeric";
-import { barrageTemplateData, getVolleyTime, Gun } from "./data";
+import { barrageTemplateData, Equipment, getVolleyTime } from "./data";
 import {
   delayAfterVolley,
   delayBeforeVolley,
@@ -8,6 +8,7 @@ import {
 import { Ship } from "../hooks/useShip";
 import { StatName } from "../types/ship";
 import { Loadout } from "../types/loadout";
+import { calculateBonusAttributes } from "../atoms/loadouts";
 
 export type CalcualteCriticalChanceParams = {
   attacker: {
@@ -75,7 +76,6 @@ type NoUndefinedField<T> = {
 };
 
 export type CalculateDamageParams = {
-  gun: Gun;
   attacker: Ship;
   loadout: Loadout;
   options?: {
@@ -130,17 +130,19 @@ export type DamageAgainstEnemy = Omit<Damage, "against" | "perBullet"> & {
 };
 
 export const calculateDamage = ({
-  gun,
   attacker,
   options,
   loadout,
 }: CalculateDamageParams): Damage => {
+  const bonusAttributes = calculateBonusAttributes(loadout);
   const totalAttributes = Object.fromEntries(
     Object.entries(attacker.attributes).map(([stat, value], index) => [
       stat,
-      value + loadout.bonusAttributes[index],
+      value + bonusAttributes[index],
     ])
   ) as Record<StatName, number>;
+
+  const gun = loadout.items[0] as unknown as Equipment<"weapon">;
 
   const ammo = options?.ammo ?? 3; // Default to a 0% buff
 

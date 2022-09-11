@@ -17,6 +17,7 @@ import { fleetShipSelector } from "../atoms/fleets";
 import { Equipment } from "../utils/data";
 import { useFleet } from "../hooks/useFleet";
 import { LoadoutProvider } from "../providers/loadout-context";
+import { isWeapon } from "../utils/guards";
 
 export type ShipProps = {
   id: ShipId;
@@ -33,13 +34,17 @@ export const Ship = ({ id }: ShipProps) => {
   const weapon = fleetShip?.loadout?.items[0] as Equipment<"weapon"> | null;
 
   const damage = useMemo(() => {
-    if (!weapon || !ship || !fleetShip?.loadout) {
+    if (
+      !weapon ||
+      !ship ||
+      !fleetShip?.loadout ||
+      !isWeapon(fleetShip.loadout.items[0])
+    ) {
       return;
     }
 
     return calculateDamage({
       attacker: ship,
-      gun: weapon,
       loadout: fleetShip.loadout,
       options: {
         ammo: 5,
