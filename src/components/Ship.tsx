@@ -6,8 +6,8 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import { Intimacy, ShipId } from "../types/ship";
-import { affinity, defender } from "../utils/constants";
+import { Attrs, Intimacy, ShipId, StatName } from "../types/ship";
+import { affinity, attributes, defender } from "../utils/constants";
 import Slider from "@mui/material/Slider";
 import Image from "next/image";
 import { Loadout } from "./Loadout";
@@ -16,6 +16,7 @@ import { useRecoilValue } from "recoil";
 import { fleetShipSelector } from "../atoms/fleets";
 import { Equipment } from "../utils/data";
 import { useFleet } from "../hooks/useFleet";
+import { LoadoutProvider } from "../providers/loadout-context";
 
 export type ShipProps = {
   id: ShipId;
@@ -44,6 +45,47 @@ export const Ship = ({ id }: ShipProps) => {
       },
     }).against(defender);
   }, [weapon, ship]);
+
+  const bonusAttributes: Attrs = useMemo(() => {
+    const attrs: Attrs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    if (!fleetShip?.loadout) {
+      return attrs;
+    }
+    const loadout = fleetShip.loadout;
+
+    loadout.items.forEach((item) => {
+      if (!item) {
+        return;
+      }
+      [1, 2, 3].forEach((index) => {
+        const attributeName = (item.stats as any)[`attribute_${index}`] as
+          | StatName
+          | undefined;
+
+        if (!attributeName) {
+          return;
+        }
+
+        attrs[attributes[attributeName][1]] +=
+          +(item.stats as any)[`value_${index}`] ?? 0;
+      });
+    });
+
+    return attrs;
+  }, [fleetShip?.loadout]);
+
+  const totalAttributes = useMemo(() => {
+    if (!ship?.attributes) {
+      return ship?.attributes;
+    }
+
+    return Object.fromEntries(
+      Object.entries(ship?.attributes).map(([stat, value], index) => [
+        stat,
+        value + bonusAttributes[index],
+      ])
+    );
+  }, [bonusAttributes, ship?.attributes]);
 
   if (!ship || !fleetShip?.loadout) {
     return null;
@@ -91,9 +133,9 @@ export const Ship = ({ id }: ShipProps) => {
           </ToggleButtonGroup>
         </div>
 
-        {ship && ship.attributes && (
+        {totalAttributes && (
           <div>
-            {Object.entries(ship.attributes).map(([stat, value]) => (
+            {Object.entries(totalAttributes).map(([stat, value]) => (
               <div key={stat}>
                 {stat}: {value}
               </div>
@@ -165,7 +207,9 @@ export const Ship = ({ id }: ShipProps) => {
         </>
       )}
 
-      <Loadout id={fleetShip.loadout.id} shipId={ship.id} />
+      <LoadoutProvider loadoutId={fleetShip.loadout.id}>
+        <Loadout shipId={ship.id} />
+      </LoadoutProvider>
     </div>
   );
 };

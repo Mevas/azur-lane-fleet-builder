@@ -1,16 +1,14 @@
 import React from "react";
-import { LoadoutId } from "../types/loadout";
 import { useLoadout } from "../hooks/useLoadout";
 import { EquipmentSelector } from "./EquipmentSelector";
 import { ShipId } from "../types/ship";
 
 export type LoadoutProps = {
-  id: LoadoutId;
   shipId: ShipId;
 };
 
-export const Loadout = ({ id, shipId }: LoadoutProps) => {
-  const [loadout, { setItem }] = useLoadout(id);
+export const Loadout = ({ shipId }: LoadoutProps) => {
+  const [loadout] = useLoadout();
 
   return (
     <div>
@@ -19,7 +17,6 @@ export const Loadout = ({ id, shipId }: LoadoutProps) => {
           item={item}
           shipId={shipId}
           key={index}
-          setItem={setItem}
           loadout={loadout}
           position={index}
         />

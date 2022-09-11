@@ -1,23 +1,18 @@
-import { LoadoutId } from "../types/loadout";
-import { useRecoilState } from "recoil";
-import { loadoutSelector } from "../atoms/loadouts";
-import { Equipment } from "../utils/data";
+import { useContext, useMemo } from "react";
+import { LoadoutContext } from "../providers/loadout-context";
 
-export const useLoadout = (id: LoadoutId) => {
-  const [loadout, setLoadout] = useRecoilState(loadoutSelector(id));
+export const useLoadout = () => {
+  const context = useContext(LoadoutContext);
+  if (context === undefined) {
+    throw new Error("useLoadout must be used within a LoadoutProvider");
+  }
 
-  const setItem = (position: number, item: Equipment | null) => {
-    setLoadout((currVal) => {
-      return {
-        ...currVal,
-        items: currVal.items.map((_item, index) =>
-          index === position ? item : _item
-        ),
-      };
-    });
-  };
-
-  return [loadout, { setLoadout, setItem }] as const;
+  return useMemo(
+    () =>
+      [
+        context.loadout,
+        { setLoadout: context.setLoadout, setItem: context.setItem },
+      ] as const,
+    [context.loadout, context.setItem, context.setLoadout]
+  );
 };
-
-export type SetItem = ReturnType<typeof useLoadout>[1]["setItem"];

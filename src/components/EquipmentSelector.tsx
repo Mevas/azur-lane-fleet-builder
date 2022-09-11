@@ -6,17 +6,16 @@ import {
   processedEquipment,
 } from "../utils/data";
 import { ShipId } from "../types/ship";
-import { SetItem } from "../hooks/useLoadout";
 import Slider from "@mui/material/Slider";
 import { Autocomplete, TextField } from "@mui/material";
 import { GunIcon } from "./GunIcon";
 import { Loadout } from "../types/loadout";
 import { useShip } from "../hooks/useShip";
+import { useLoadout } from "../hooks/useLoadout";
 
 export type EquipmentSelectorProps = {
   item: Equipment | null;
   shipId: ShipId;
-  setItem: SetItem;
   loadout: Loadout;
   position: number;
 };
@@ -26,13 +25,11 @@ const selectorOptions = Object.values(processedEquipment).map(
 );
 
 export const EquipmentSelector = ({
-  item,
   shipId,
-  loadout,
   position,
-  setItem,
 }: EquipmentSelectorProps) => {
   const ship = useShip(shipId);
+  const [, { setItem }] = useLoadout();
   const [selectedEquipment, setSelectedEquipment] = useState<{
     label: string;
     id: number;

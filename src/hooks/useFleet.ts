@@ -4,7 +4,7 @@ import { FleetContext } from "../providers/fleet-context";
 export const useFleet = () => {
   const context = useContext(FleetContext);
   if (context === undefined) {
-    throw new Error("useCount must be used within a CountProvider");
+    throw new Error("useFleet must be used within a FleetProvider");
   }
 
   return useMemo(
