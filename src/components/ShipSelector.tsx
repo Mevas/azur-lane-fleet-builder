@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Autocomplete, TextField } from "@mui/material";
 import { Ship } from "./Ship";
-import { Fleet, ShipData } from "../types/ship";
+import { ShipData } from "../types/ship";
 import { nationality } from "../utils/constants";
 import { ships } from "../utils/data";
-import { FleetPosition, SetShip } from "../hooks/useFleet";
+import { useFleet } from "../hooks/useFleet";
 import { useLoadouts } from "../hooks/useLoadouts";
+import { FleetPosition } from "../providers/fleet-context";
 
 const getName = (ship: ShipData) => {
   return `${ship.name} (${nationality[ship.nationality]})`;
@@ -23,16 +24,11 @@ const options = Object.entries(ships)
   .sort();
 
 export type ShipSelectorProps = {
-  setShip: SetShip;
   position: FleetPosition;
-  fleet: Fleet;
 };
 
-export const ShipSelector = ({
-  position,
-  setShip,
-  fleet,
-}: ShipSelectorProps) => {
+export const ShipSelector = ({ position }: ShipSelectorProps) => {
+  const [, fleet] = useFleet();
   const [selectedShip, setSelectedShip] = useState<{
     label: string;
     id: number;
@@ -61,14 +57,17 @@ export const ShipSelector = ({
               loadoutId = loadouts.create(newValue.id);
             }
 
-            setShip(position, newValue ? { id: newValue.id, loadoutId } : null);
+            fleet.setShip(
+              position,
+              newValue ? { id: newValue.id, loadoutId } : null
+            );
             setSelectedShip(newValue);
           }}
           value={selectedShip}
         />
       </div>
 
-      {selectedShip?.id && <Ship id={selectedShip.id} fleet={fleet} />}
+      {selectedShip?.id && <Ship id={selectedShip.id} />}
     </div>
   );
 };

@@ -6,7 +6,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import { Fleet, Intimacy, ShipId } from "../types/ship";
+import { Intimacy, ShipId } from "../types/ship";
 import { affinity, defender } from "../utils/constants";
 import Slider from "@mui/material/Slider";
 import Image from "next/image";
@@ -15,13 +15,15 @@ import { calculateDamage } from "../utils/formulas";
 import { useRecoilValue } from "recoil";
 import { fleetShipSelector } from "../atoms/fleets";
 import { Equipment } from "../utils/data";
+import { useFleet } from "../hooks/useFleet";
 
 export type ShipProps = {
   id: ShipId;
-  fleet: Fleet;
 };
 
-export const Ship = ({ id, fleet }: ShipProps) => {
+export const Ship = ({ id }: ShipProps) => {
+  const [fleet] = useFleet();
+
   const ship = useShip(id);
   const fleetShip = useRecoilValue(
     fleetShipSelector({ fleetId: fleet.id, shipId: id })
