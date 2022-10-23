@@ -14779,6 +14779,120 @@
     "value_1": "13",
     "value_2": 16
   },
+  "3620": {
+    "ammo": 10,
+    "ammo_icon": [],
+    "ammo_info": [],
+    "attribute_1": "torpedo",
+    "attribute_2": "durability",
+    "descrip": "A permit that allows the wielder to cross into the domain of the exercise area. It seems to be made out of a special material, and feels strange to the touch.",
+    "equip_info": [
+      6
+    ],
+    "equip_parameters": [],
+    "hidden_skill_id": [],
+    "icon": "3620",
+    "id": 3620,
+    "label": [
+      "IJN",
+      "DEV"
+    ],
+    "name": "Boundary-Crossing Permit",
+    "nationality": 3,
+    "part_main": [],
+    "part_sub": [],
+    "property_rate": [],
+    "rarity": 4,
+    "skill_id": [
+      6990
+    ],
+    "speciality": "N/A",
+    "tech": 0,
+    "torpedo_ammo": 0,
+    "type": 10,
+    "value_1": "20",
+    "value_2": 17,
+    "value_3": 0,
+    "weapon_id": []
+  },
+  "3621": {
+    "base": 3620,
+    "hidden_skill_id": [],
+    "id": 3621,
+    "value_1": "23",
+    "value_2": 20
+  },
+  "3622": {
+    "base": 3620,
+    "hidden_skill_id": [],
+    "id": 3622,
+    "value_1": "26",
+    "value_2": 23
+  },
+  "3623": {
+    "base": 3620,
+    "hidden_skill_id": [],
+    "id": 3623,
+    "value_1": "29",
+    "value_2": 26
+  },
+  "3624": {
+    "base": 3620,
+    "hidden_skill_id": [],
+    "id": 3624,
+    "value_1": "32",
+    "value_2": 29
+  },
+  "3625": {
+    "base": 3620,
+    "hidden_skill_id": [],
+    "id": 3625,
+    "value_1": "35",
+    "value_2": 32
+  },
+  "3626": {
+    "base": 3620,
+    "hidden_skill_id": [],
+    "id": 3626,
+    "value_1": "38",
+    "value_2": 35
+  },
+  "3627": {
+    "base": 3620,
+    "hidden_skill_id": [],
+    "id": 3627,
+    "value_1": "41",
+    "value_2": 38
+  },
+  "3628": {
+    "base": 3620,
+    "hidden_skill_id": [],
+    "id": 3628,
+    "value_1": "44",
+    "value_2": 41
+  },
+  "3629": {
+    "base": 3620,
+    "hidden_skill_id": [],
+    "id": 3629,
+    "value_1": "47",
+    "value_2": 44
+  },
+  "3630": {
+    "base": 3620,
+    "hidden_skill_id": [],
+    "id": 3630,
+    "value_1": "50",
+    "value_2": 47
+  },
+  "3631": {
+    "anti_siren": 100,
+    "base": 3620,
+    "hidden_skill_id": [],
+    "id": 3631,
+    "value_1": "53",
+    "value_2": 50
+  },
   "4000": {
     "ammo": 8,
     "ammo_icon": [],
@@ -58927,7 +59041,7 @@
       "BB",
       "MG"
     ],
-    "name": "Twin 356mm 41st Year Type Naval Gun Mount",
+    "name": "Twin 305mm Naval Gun Mount",
     "nationality": 3,
     "part_main": [
       4,
@@ -64719,7 +64833,7 @@
       "BB",
       "MG"
     ],
-    "name": "Triple 460mm Mounted Gun",
+    "name": "Triple 460mm Main Gun Mount",
     "nationality": 3,
     "part_main": [
       4,
@@ -64862,7 +64976,7 @@
       "BB",
       "MG"
     ],
-    "name": "Triple 460mm Mounted Gun",
+    "name": "Triple 460mm Main Gun Mount",
     "nationality": 3,
     "part_main": [
       4,
@@ -64982,12 +65096,12 @@
     "ammo_info": [
       [
         2,
-        1511
+        1514
       ]
     ],
     "attribute_2": "cannon",
     "damage": "72 x 3",
-    "descrip": "No description",
+    "descrip": "The 460mm main cannons that saw use on the Yamato-class battleships.",
     "equip_info": [
       1,
       2,
@@ -65006,7 +65120,7 @@
       "MG",
       "AP"
     ],
-    "name": "Triple 460mm Mounted Gun",
+    "name": "Triple 460mm Main Gun Mount",
     "nationality": 3,
     "part_main": [
       4,
@@ -65019,10 +65133,10 @@
     "rarity": 6,
     "skill_id": [],
     "speciality": "Volley",
-    "tech": 3,
+    "tech": 0,
     "torpedo_ammo": 0,
     "type": 4,
-    "value_2": 70,
+    "value_2": 65,
     "value_3": 0,
     "weapon_id": [
       34240
@@ -109349,6 +109463,108 @@
     "name": "专属弹幕-特伦托.METAII",
     "weapon_id": [
       60872
+    ]
+  },
+  "79941": {
+    "ammo": 10,
+    "ammo_icon": [],
+    "ammo_info": [],
+    "descrip": "Barrage",
+    "equip_info": [],
+    "equip_parameters": [],
+    "hidden_skill_id": [],
+    "icon": "1",
+    "id": 79941,
+    "label": [],
+    "name": "专属弹幕-酒匂I",
+    "nationality": 0,
+    "part_main": [
+      1,
+      19,
+      20,
+      21
+    ],
+    "part_sub": [
+      2,
+      3,
+      4,
+      5,
+      8,
+      13,
+      18
+    ],
+    "property_rate": [],
+    "rarity": 1,
+    "skill_id": [],
+    "speciality": "N/A",
+    "tech": 1,
+    "torpedo_ammo": 0,
+    "type": 1,
+    "value_1": "0",
+    "value_2": 0,
+    "value_3": 0,
+    "weapon_id": [
+      60881
+    ]
+  },
+  "79942": {
+    "base": 79941,
+    "hidden_skill_id": [],
+    "id": 79942,
+    "name": "专属弹幕-酒匂II",
+    "weapon_id": [
+      60882
+    ]
+  },
+  "79951": {
+    "ammo": 10,
+    "ammo_icon": [],
+    "ammo_info": [],
+    "descrip": "Barrage",
+    "equip_info": [],
+    "equip_parameters": [],
+    "hidden_skill_id": [],
+    "icon": "1",
+    "id": 79951,
+    "label": [],
+    "name": "专属弹幕-若月I",
+    "nationality": 0,
+    "part_main": [
+      1,
+      19,
+      20,
+      21
+    ],
+    "part_sub": [
+      2,
+      3,
+      4,
+      5,
+      8,
+      13,
+      18
+    ],
+    "property_rate": [],
+    "rarity": 1,
+    "skill_id": [],
+    "speciality": "N/A",
+    "tech": 1,
+    "torpedo_ammo": 0,
+    "type": 1,
+    "value_1": "0",
+    "value_2": 0,
+    "value_3": 0,
+    "weapon_id": [
+      60891
+    ]
+  },
+  "79952": {
+    "base": 79951,
+    "hidden_skill_id": [],
+    "id": 79952,
+    "name": "专属弹幕-若月II",
+    "weapon_id": [
+      60892
     ]
   },
   "85000": {
