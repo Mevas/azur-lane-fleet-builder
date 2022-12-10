@@ -1,10 +1,11 @@
 import React from "react";
 import { ShipSelector } from "./ShipSelector";
 import { useFleet } from "../hooks/useFleet";
+import { calculateAADamage } from "../utils/formulas";
 
 export const Fleet = React.memo(function Fleet() {
   const [fleet] = useFleet();
-
+  console.log(calculateAADamage({ fleet }));
   return (
     <div>
       {fleet.name}

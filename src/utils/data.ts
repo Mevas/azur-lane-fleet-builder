@@ -63,6 +63,7 @@ export const getShip = (id: number, options: { lb: number }) => {
 
   const shipId = +`${groupId}${options.lb + 1}`;
 
+  // 4th LB is actually LB 0
   const limitBreaks = [4, 1, 2, 3].map(
     (num) => limitBreakData[+`${groupId}${num}`]
   );

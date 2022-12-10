@@ -1,6 +1,7 @@
-import { atomFamily } from "recoil";
-import { OwnedShip } from "../types/ship";
+import { atomFamily, selectorFamily } from "recoil";
+import { FleetShip, OwnedShip, ShipId } from "../types/ship";
 import { ships } from "../utils/data";
+import { FleetId, fleetSelector } from "./fleets";
 
 const defaultState = {
   level: 100,
@@ -22,4 +23,18 @@ const defaultShips = Object.fromEntries(
 export const shipsStateFamily = atomFamily<OwnedShip, number>({
   key: "ships",
   default: (id) => defaultShips[id],
+});
+
+export const shipSelector = selectorFamily<
+  FleetShip | undefined,
+  { fleetId: FleetId; shipId: ShipId }
+>({
+  key: "fleetShipSelector",
+  get:
+    ({ shipId }) =>
+    ({ get }) => {
+      const ship = get(shipsStateFamily(shipId));
+
+      return ship;
+    },
 });

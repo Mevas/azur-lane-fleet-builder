@@ -6,7 +6,7 @@ import {
   RELOAD_CONSTANT,
 } from "./constants";
 import { Ship } from "../hooks/useShip";
-import { StatName } from "../types/ship";
+import { Fleet, StatName } from "../types/ship";
 import { Loadout } from "../types/loadout";
 import { calculateBonusAttributes } from "../atoms/loadouts";
 
@@ -129,6 +129,18 @@ export type DamageAgainstEnemy = Omit<Damage, "against" | "perBullet"> & {
   criticalMultiplier: number;
 };
 
+export const calculateGunReloadTime = (
+  gun: Equipment<"weapon">,
+  totalAttributes: Record<StatName, number>,
+  reloadSkillBonus: number
+) => {
+  return (
+    gun.properties.reload_time *
+    RELOAD_CONSTANT *
+    Math.sqrt(200 / (totalAttributes.reload * (1 + reloadSkillBonus) + 100))
+  );
+};
+
 export const calculateDamage = ({
   attacker,
   options,
@@ -176,10 +188,11 @@ export const calculateDamage = ({
 
   const reloadSkillBonus = options?.reloadSkillBonus ?? 0;
 
-  const reloadTime =
-    gun.properties.reload_time *
-    RELOAD_CONSTANT *
-    Math.sqrt(200 / (totalAttributes.reload * (1 + reloadSkillBonus) + 100));
+  const reloadTime = calculateGunReloadTime(
+    gun,
+    totalAttributes,
+    reloadSkillBonus
+  );
 
   const barrages = gun.properties.barrage_ID.map(
     (id) => barrageTemplateData[id]
@@ -270,6 +283,59 @@ export const calculateDamage = ({
       };
     },
   };
+};
+
+export type CalculateAADamageParams = {
+  fleet: Fleet;
+  options?: {
+    /** Bonus from the chosen formation */
+    formationBonus?: number;
+    skillBuffs?: number;
+  };
+};
+
+const calculateGunAADamage = (gun: Equipment<"weapon">) => {};
+
+export const calculateAADamage = ({
+  fleet,
+  options,
+}: CalculateAADamageParams) => {
+  let finalDamage = 0;
+  let reloadTime = 0;
+  let radius = 0;
+  let numAaGuns = 0;
+
+  Object.values(fleet.ships).forEach((side) =>
+    Object.values(side).forEach((ship) => {
+      if (!ship?.loadout) {
+        return;
+      }
+
+      ship.loadout.items.forEach((item, position) => {
+        if (!item || item.template.type !== 6 || !item.properties) {
+          return;
+        }
+        const slotEff = 1; // TODO
+        const shipAA = 248 + 45; // TODO
+        const formationBonus = 0; // TODO
+        const statBonus = 0; // TODO
+        console.log(item);
+        finalDamage +=
+          (item.properties.damage *
+            slotEff *
+            (100 + shipAA * (1 + formationBonus + statBonus))) /
+          100;
+
+        reloadTime += item.properties.reload_time;
+
+        numAaGuns++;
+      });
+    })
+  );
+
+  reloadTime = reloadTime / numAaGuns + 0.5;
+  console.log(reloadTime);
+  return finalDamage;
 };
 
 // const test = Object.values(equipmentData).slice(0, 100);
